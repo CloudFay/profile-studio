@@ -239,6 +239,27 @@ a { color: var(--accent); }
 .md p[align="center"], .md div[align="center"] { text-align: center; }
 .md-badges img { margin: 3px; }
 
+/* DEV.to preview cards */
+.devto-preview { margin-top: 8px; }
+.devto-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+.devto-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display:flex; flex-direction:column; min-height: 220px; box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
+.devto-cover img { width:100%; height:140px; object-fit:cover; display:block; }
+.devto-body { padding: 14px; display:flex; flex-direction:column; gap:10px; flex:1; min-height:0; }
+.devto-title { font-size:15px; margin:0; color:var(--text); line-height:1.2; font-weight:700; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; }
+.devto-title a { color:inherit; text-decoration:none; }
+.devto-desc { margin:0; color:var(--text-soft); font-size:13px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.devto-tags { display:flex; gap:8px; flex-wrap:wrap; }
+.devto-tag { background:var(--surface); border:1px solid var(--border); color:var(--text-soft); padding:6px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+.devto-meta { margin-top:auto; display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-mute); justify-content:space-between; flex-wrap:wrap; }
+.meta-author { color:var(--text-soft); font-weight:600; }
+.meta-date { color:var(--text-mute); font-family:var(--font-mono); font-size:12px; }
+.devto-read { color:var(--accent); font-weight:700; margin-left:auto; text-decoration:none; }
+.devto-read:hover { text-decoration:underline; }
+
+/* responsive */
+@media (max-width: 980px) { .devto-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .devto-grid { grid-template-columns: 1fr; } .devto-card { min-height: 200px; } }
+
 /* raw markdown */
 .md-raw { max-width: 860px; margin: 0 auto; background: var(--inset); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-soft); white-space: pre-wrap; word-break: break-word; box-shadow: var(--shadow); }
 

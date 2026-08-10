@@ -627,26 +627,50 @@ function generate() {
   if (a.devto && devtoUser && s.devtoCache && s.devtoCache.articles.length) {
     L.push("### 📝 Latest DEV.to Articles");
     L.push("");
-    s.devtoCache.articles.slice(0, s.devtoPostCount || 5).forEach((article) => {
-      const title = escapeMdText(article.title || "");
+    // Render a compact card-based preview (HTML) for the preview pane only.
+    const previewArticles = s.devtoCache.articles.slice(0, Math.min(3, s.devtoPostCount || 5));
+    L.push('<div class="devto-preview">');
+    L.push('  <div class="devto-grid">');
+    previewArticles.forEach((article) => {
+      const title = escapeHtml(article.title || "");
       const url = article.url || "";
       const date = article.published_at ? new Date(article.published_at).toLocaleDateString() : "";
       const coverImage = article.cover_image || article.social_image || "";
-      
+      const descRaw = (article.description || "").replace(/\s+/g, " ").trim();
+      const desc = escapeHtml(descRaw.substring(0, 160));
+
+      // Normalize tags (DEV.to may provide tag_list or tags)
+      let tags = [];
+      if (Array.isArray(article.tag_list)) tags = article.tag_list;
+      else if (typeof article.tag_list === 'string' && article.tag_list.trim()) tags = article.tag_list.split(',').map(t=>t.trim());
+      else if (article.tags) {
+        if (Array.isArray(article.tags)) tags = article.tags; else tags = String(article.tags).split(',').map(t=>t.trim());
+      }
+      const visibleTags = tags.slice(0, 3);
+      const moreTags = Math.max(0, tags.length - visibleTags.length);
+
+      L.push('    <article class="devto-card">');
       if (coverImage) {
-        // Include clickable cover image
-        L.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`);
-        L.push(`  <img src="${escapeHtml(coverImage)}" alt="${escapeHtml(title)}" width="100%" style="border-radius:8px;margin-bottom:8px;" />`);
-        L.push(`</a>`);
+        L.push('      <a class="devto-cover" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">');
+        L.push('        <img src="' + escapeHtml(coverImage) + '" alt="' + escapeHtml(title) + '" />');
+        L.push('      </a>');
       }
-      L.push(`**${title}**${date ? ` — ${date}` : ""}`);
-      if (article.description) {
-        const desc = escapeMdText((article.description || "").substring(0, 120));
-        L.push(`  \n${desc}...`);
+      L.push('      <div class="devto-body">');
+      L.push('        <h4 class="devto-title"><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(title) + '</a></h4>');
+      if (desc) L.push('        <p class="devto-desc">' + desc + (desc.length >= 160 ? '...' : '') + '</p>');
+
+      if (visibleTags.length) {
+        const tagHtml = visibleTags.map((t) => '<span class="devto-tag">#' + escapeHtml(String(t).replace(/^#/, '')) + '</span>').join('');
+        L.push('        <div class="devto-tags">' + tagHtml + (moreTags ? '<span class="devto-tag">+' + moreTags + '</span>' : '') + '</div>');
       }
-      L.push("");
+
+      L.push('        <div class="devto-meta"><span class="meta-author">' + escapeHtml((article.user && article.user.name) || (article.user && article.user.username) || '') + '</span> <span class="meta-sep">•</span> <span class="meta-date">' + escapeHtml(date) + '</span> <a class="devto-read" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Read more ↗</a></div>');
+      L.push('      </div>');
+      L.push('    </article>');
     });
-    L.push(`[➜ See more on DEV.to](https://dev.to/${escapeHtml(devtoUser)})`);
+    L.push('  </div>');
+    L.push('  <div style="margin-top:16px;text-align:left;"><a class="btn btn-primary" href="https://dev.to/' + escapeHtml(devtoUser) + '" target="_blank" rel="noopener noreferrer">See more →</a></div>');
+    L.push('</div>');
     L.push("");
   }
 
