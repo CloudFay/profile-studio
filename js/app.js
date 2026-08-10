@@ -634,18 +634,19 @@ function generate() {
       const coverImage = article.cover_image || article.social_image || "";
       
       if (coverImage) {
-        // Include cover image with alt text, clickable to article
+        // Include clickable cover image
         L.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`);
         L.push(`  <img src="${escapeHtml(coverImage)}" alt="${escapeHtml(title)}" width="100%" style="border-radius:8px;margin-bottom:8px;" />`);
         L.push(`</a>`);
       }
-      L.push(`**[${title}](${url})**${date ? ` — ${date}` : ""}`);
+      L.push(`**${title}**${date ? ` — ${date}` : ""}`);
       if (article.description) {
         const desc = escapeMdText((article.description || "").substring(0, 120));
         L.push(`  \n${desc}...`);
       }
       L.push("");
     });
+    L.push(`[➜ See more on DEV.to](https://dev.to/${escapeHtml(devtoUser)})`);
     L.push("");
   }
 
