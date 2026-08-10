@@ -495,7 +495,7 @@ function statTheme() {
   return document.documentElement.getAttribute("data-theme") === "dark" ? "tokyonight" : "default";
 }
 
-function generate() {
+function generate(readmeMode = false) {
   const s = state;
   const user = (s.username || "").trim();
   const uEnc = encodeURIComponent(user); // safe for API query strings
@@ -622,57 +622,301 @@ function generate() {
     L.push("");
   }
 
-  // ───────── DEV.TO ARTICLES ─────────
-  const devtoUser = normalizeDevToUsername(s.devtoUsername);
-  if (a.devto && devtoUser && s.devtoCache && s.devtoCache.articles.length) {
-    L.push("### 📝 Latest DEV.to Articles");
-    L.push("");
-    // Render a compact card-based preview (HTML) for the preview pane only.
-    const previewArticles = s.devtoCache.articles.slice(0, Math.min(3, s.devtoPostCount || 5));
-    L.push('<div class="devto-preview">');
-    L.push('  <div class="devto-grid">');
-    previewArticles.forEach((article) => {
+// ───────── DEV.TO ARTICLES ─────────
+const devtoUser = normalizeDevToUsername(s.devtoUsername);
+
+if (
+  a.devto &&
+  devtoUser &&
+  s.devtoCache &&
+  s.devtoCache.articles.length
+) {
+  L.push("### 📝 Latest DEV.to Articles");
+  L.push("");
+
+  const articles = s.devtoCache.articles.slice(
+    0,
+    Math.min(3, s.devtoPostCount || 5)
+  );
+
+  // ─────────────────────────────────────────────
+  // GITHUB README VERSION
+  // Uses native GitHub-supported HTML.
+  // No Profile Studio CSS/classes required.
+  // ─────────────────────────────────────────────
+  if (readmeMode) {
+    L.push("<table>");
+    L.push("<tr>");
+
+    articles.forEach((article) => {
       const title = escapeHtml(article.title || "");
-      const url = article.url || "";
-      const date = article.published_at ? new Date(article.published_at).toLocaleDateString() : "";
-      const coverImage = article.cover_image || article.social_image || "";
-      const descRaw = (article.description || "").replace(/\s+/g, " ").trim();
-      const desc = escapeHtml(descRaw.substring(0, 160));
+      const url = escapeHtml(article.url || "");
 
-      // Normalize tags (DEV.to may provide tag_list or tags)
+      const date = article.published_at
+        ? new Date(article.published_at).toLocaleDateString()
+        : "";
+
+      const coverImage =
+        article.cover_image ||
+        article.social_image ||
+        "";
+
+      const descRaw = (article.description || "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const desc = escapeHtml(descRaw.substring(0, 140));
+
+      // Normalize DEV.to tags
       let tags = [];
-      if (Array.isArray(article.tag_list)) tags = article.tag_list;
-      else if (typeof article.tag_list === 'string' && article.tag_list.trim()) tags = article.tag_list.split(',').map(t=>t.trim());
-      else if (article.tags) {
-        if (Array.isArray(article.tags)) tags = article.tags; else tags = String(article.tags).split(',').map(t=>t.trim());
+
+      if (Array.isArray(article.tag_list)) {
+        tags = article.tag_list;
+      } else if (
+        typeof article.tag_list === "string" &&
+        article.tag_list.trim()
+      ) {
+        tags = article.tag_list
+          .split(",")
+          .map((t) => t.trim());
+      } else if (article.tags) {
+        tags = Array.isArray(article.tags)
+          ? article.tags
+          : String(article.tags)
+              .split(",")
+              .map((t) => t.trim());
       }
+
       const visibleTags = tags.slice(0, 3);
-      const moreTags = Math.max(0, tags.length - visibleTags.length);
+      const moreTags = Math.max(
+        0,
+        tags.length - visibleTags.length
+      );
 
-      L.push('    <article class="devto-card">');
+      const author =
+        (article.user && article.user.name) ||
+        (article.user && article.user.username) ||
+        "";
+
+      L.push('<td width="33%" valign="top">');
+
+      // Cover image
       if (coverImage) {
-        L.push('      <a class="devto-cover" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">');
-        L.push('        <img src="' + escapeHtml(coverImage) + '" alt="' + escapeHtml(title) + '" />');
-        L.push('      </a>');
+        L.push(`<a href="${url}">`);
+        L.push(
+          `<img src="${escapeHtml(coverImage)}" width="100%" alt="${title}" />`
+        );
+        L.push("</a>");
+        L.push("<br>");
       }
-      L.push('      <div class="devto-body">');
-      L.push('        <h4 class="devto-title"><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(title) + '</a></h4>');
-      if (desc) L.push('        <p class="devto-desc">' + desc + (desc.length >= 160 ? '...' : '') + '</p>');
 
+      L.push("<br>");
+
+      // Title
+      L.push(
+        `<strong><a href="${url}">${title}</a></strong>`
+      );
+
+      L.push("<br><br>");
+
+      // Description
+      if (desc) {
+        L.push(
+          `${desc}${descRaw.length > 140 ? "..." : ""}`
+        );
+        L.push("<br><br>");
+      }
+
+      // Tags
       if (visibleTags.length) {
-        const tagHtml = visibleTags.map((t) => '<span class="devto-tag">#' + escapeHtml(String(t).replace(/^#/, '')) + '</span>').join('');
-        L.push('        <div class="devto-tags">' + tagHtml + (moreTags ? '<span class="devto-tag">+' + moreTags + '</span>' : '') + '</div>');
+        const tagHtml = visibleTags
+          .map(
+            (tag) =>
+              `<code>#${escapeHtml(
+                String(tag).replace(/^#/, "")
+              )}</code>`
+          )
+          .join(" ");
+
+        L.push(tagHtml);
+
+        if (moreTags) {
+          L.push(` <code>+${moreTags}</code>`);
+        }
+
+        L.push("<br><br>");
       }
 
-      L.push('        <div class="devto-meta"><span class="meta-author">' + escapeHtml((article.user && article.user.name) || (article.user && article.user.username) || '') + '</span> <span class="meta-sep">•</span> <span class="meta-date">' + escapeHtml(date) + '</span> <a class="devto-read" href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">Read more ↗</a></div>');
-      L.push('      </div>');
-      L.push('    </article>');
+      // Author + date
+      L.push(
+        `<sub>${escapeHtml(author)}${
+          date ? ` · ${escapeHtml(date)}` : ""
+        }</sub>`
+      );
+
+      L.push("<br><br>");
+
+      // Read more
+      L.push(
+        `<a href="${url}"><strong>Read more ↗</strong></a>`
+      );
+
+      L.push("</td>");
     });
-    L.push('  </div>');
-    L.push('  <div style="margin-top:16px;text-align:left;"><a class="btn btn-primary" href="https://dev.to/' + escapeHtml(devtoUser) + '" target="_blank" rel="noopener noreferrer">See more →</a></div>');
-    L.push('</div>');
+
+    L.push("</tr>");
+    L.push("</table>");
+    L.push("");
+
+    // GitHub-compatible See More button
+    const devtoProfile = `https://dev.to/${encodeURIComponent(
+      devtoUser
+    )}`;
+
+    L.push(
+      `[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](${devtoProfile})`
+    );
+
     L.push("");
   }
+
+  // ─────────────────────────────────────────────
+  // PROFILE STUDIO PREVIEW VERSION
+  // Keeps your existing beautiful card UI.
+  // ─────────────────────────────────────────────
+  else {
+    L.push('<div class="devto-preview">');
+    L.push('  <div class="devto-grid">');
+
+    articles.forEach((article) => {
+      const title = escapeHtml(article.title || "");
+      const url = article.url || "";
+
+      const date = article.published_at
+        ? new Date(article.published_at).toLocaleDateString()
+        : "";
+
+      const coverImage =
+        article.cover_image ||
+        article.social_image ||
+        "";
+
+      const descRaw = (article.description || "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const desc = escapeHtml(descRaw.substring(0, 160));
+
+      // Normalize tags
+      let tags = [];
+
+      if (Array.isArray(article.tag_list)) {
+        tags = article.tag_list;
+      } else if (
+        typeof article.tag_list === "string" &&
+        article.tag_list.trim()
+      ) {
+        tags = article.tag_list
+          .split(",")
+          .map((t) => t.trim());
+      } else if (article.tags) {
+        tags = Array.isArray(article.tags)
+          ? article.tags
+          : String(article.tags)
+              .split(",")
+              .map((t) => t.trim());
+      }
+
+      const visibleTags = tags.slice(0, 3);
+      const moreTags = Math.max(
+        0,
+        tags.length - visibleTags.length
+      );
+
+      L.push('    <article class="devto-card">');
+
+      if (coverImage) {
+        L.push(
+          `      <a class="devto-cover" href="${escapeHtml(
+            url
+          )}" target="_blank" rel="noopener noreferrer">`
+        );
+
+        L.push(
+          `        <img src="${escapeHtml(
+            coverImage
+          )}" alt="${title}" />`
+        );
+
+        L.push("      </a>");
+      }
+
+      L.push('      <div class="devto-body">');
+
+      L.push(
+        `        <h4 class="devto-title"><a href="${escapeHtml(
+          url
+        )}" target="_blank" rel="noopener noreferrer">${title}</a></h4>`
+      );
+
+      if (desc) {
+        L.push(
+          `        <p class="devto-desc">${desc}${
+            descRaw.length > 160 ? "..." : ""
+          }</p>`
+        );
+      }
+
+      if (visibleTags.length) {
+        const tagHtml = visibleTags
+          .map(
+            (tag) =>
+              `<span class="devto-tag">#${escapeHtml(
+                String(tag).replace(/^#/, "")
+              )}</span>`
+          )
+          .join("");
+
+        L.push(
+          `        <div class="devto-tags">${tagHtml}${
+            moreTags
+              ? `<span class="devto-tag">+${moreTags}</span>`
+              : ""
+          }</div>`
+        );
+      }
+
+      const author =
+        (article.user && article.user.name) ||
+        (article.user && article.user.username) ||
+        "";
+
+      L.push(
+        `        <div class="devto-meta"><span class="meta-author">${escapeHtml(
+          author
+        )}</span> <span class="meta-sep">•</span> <span class="meta-date">${escapeHtml(
+          date
+        )}</span> <a class="devto-read" href="${escapeHtml(
+          url
+        )}" target="_blank" rel="noopener noreferrer">Read more ↗</a></div>`
+      );
+
+      L.push("      </div>");
+      L.push("    </article>");
+    });
+
+    L.push("  </div>");
+
+    L.push(
+      `  <div style="margin-top:16px;text-align:left;"><a class="btn btn-primary" href="https://dev.to/${escapeHtml(
+        devtoUser
+      )}" target="_blank" rel="noopener noreferrer">See more →</a></div>`
+    );
+
+    L.push("</div>");
+    L.push("");
+  }
+}
 
   // ───────── FOOTER ─────────
   L.push("---");
@@ -683,8 +927,8 @@ function generate() {
 
 // ─── render preview ───
 function render() {
-  const md = generate();
-  document.getElementById("previewRaw").textContent = md;
+  const md = generate(false);
+  document.getElementById("previewRaw").textContent = generate(true);
   const rendered = document.getElementById("previewRendered");
   const hasUser = (state.username || "").trim();
   if (!hasUser) {
@@ -768,10 +1012,14 @@ function flash(msg) {
   setTimeout(() => t.remove(), 2200);
 }
 function copyMd() {
-  navigator.clipboard.writeText(generate()).then(() => flash("Markdown copied to clipboard")).catch(() => flash("Copy failed — select the Markdown tab"));
+  navigator.clipboard
+    .writeText(generate(true))
+    .then(() => flash("GitHub README copied to clipboard"))
+    .catch(() => flash("Copy failed — select the Markdown tab"));
 }
 function downloadMd() {
-  const blob = new Blob([generate()], { type: "text/markdown" });
+  const blob = new Blob([generate(true)], {
+    type: "text/markdown"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "README.md";
@@ -815,7 +1063,7 @@ function createAnother() {
   if (confirm("Start a fresh profile? This clears the current one.")) { doReset(); flash("New profile started"); }
 }
 async function shareProfile() {
-  const md = generate();
+  const md = generate(true);
   if (navigator.share) {
     try { await navigator.share({ title: "My GitHub profile README", text: md }); return; } catch (e) {}
   }
