@@ -1,6 +1,6 @@
 # 🎨 Profile Studio
 
-### 🚀 [**Open the live app →**](https://techwithgen.github.io/profile-studio/)
+### 🚀 [**Open the live app →**](https://cloudfay.github.io/profile-studio/)
 
 Fill in a short, friendly wizard and walk away with clean, ready-to-paste
 Markdown — an animated header, tech badges, social links, live GitHub stats,
