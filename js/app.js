@@ -1,0 +1,865 @@
+// app.js — wizard logic, markdown generation, live preview
+
+const STEPS = ["Identity", "About", "Stack", "Socials", "Add-ons"];
+const LS_KEY = "ghprofile.v2";
+
+const defaultState = () => ({
+  name: "", username: "", tagline: "", tagline2: "",
+  greeting: "Hello! I'm", headlineColor: "#a371f7",
+  bio: "", working: "", learning: "", collab: "", help: "", ask: "", pronouns: "", fun: "",
+  tech: {},          // { category: [names] }
+  socials: {},       // { key: value }
+  factOrder: ["working", "learning", "collab", "help", "ask", "pronouns", "fun"],
+  socialOrder: ["linkedin", "x", "instagram", "tiktok", "youtube", "pinterest", "devto", "website", "email"],
+  addons: { stats: true, langs: true, activity: true, quote: true, devto: false },
+  devtoUsername: "",
+  devtoPostCount: 5,
+  devtoCache: { articles: [], lastFetch: 0, error: "" },
+  statsHost: "",
+  badgeStyle: "for-the-badge",
+  accent: "#2ea043",
+});
+
+// About fact fields (drag-reorderable)
+const ABOUT_FIELDS = {
+  working:  { emoji: "\uD83D\uDD2D", label: "Currently working on", lead: "I'm currently working on", placeholder: "a real-time collaboration engine" },
+  learning: { emoji: "\uD83C\uDF31", label: "Currently learning", lead: "I'm currently learning", placeholder: "Rust and distributed systems" },
+  collab:   { emoji: "\uD83D\uDC6F", label: "Looking to collaborate on", lead: "I'm looking to collaborate on", placeholder: "open-source developer tools" },
+  help:     { emoji: "\uD83E\uDD14", label: "Looking for help with", lead: "I'm looking for help with", placeholder: "scaling WebSocket infrastructure" },
+  ask:      { emoji: "\uD83D\uDCAC", label: "Ask me about", lead: "Ask me about", placeholder: "React, Node.js, API design" },
+  pronouns: { emoji: "\uD83D\uDE04", label: "Pronouns", lead: "Pronouns:", placeholder: "she/her" },
+  fun:      { emoji: "\u26A1", label: "Fun fact", lead: "Fun fact:", placeholder: "I once debugged from a mountaintop" },
+};
+
+// ─── color themes (accent palette) ───
+const THEME_COLORS = [
+  { name: "GitHub Green", hex: "#2ea043" },
+  { name: "Ocean",       hex: "#2f81f7" },
+  { name: "Indigo",      hex: "#4f46e5" },
+  { name: "Violet",      hex: "#8957e5" },
+  { name: "Purple",      hex: "#a855f7" },
+  { name: "Magenta",     hex: "#db61a2" },
+  { name: "Rose",        hex: "#f43f5e" },
+  { name: "Ruby",        hex: "#e5484d" },
+  { name: "Orange",      hex: "#e36209" },
+  { name: "Amber",       hex: "#d29922" },
+  { name: "Lime",        hex: "#65a30d" },
+  { name: "Teal",        hex: "#1f9c8f" },
+  { name: "Cyan",        hex: "#0891b2" },
+  { name: "Slate",       hex: "#5b6573" },
+];
+
+let state = load();
+let step = 0;
+let previewMode = "preview";
+
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(LS_KEY));
+    if (raw && typeof raw === "object") {
+      const s = Object.assign(defaultState(), raw);
+      s.addons = Object.assign(defaultState().addons, raw.addons || {});
+      s.devtoCache = Object.assign(defaultState().devtoCache, raw.devtoCache || {});
+      delete s.addons.views; delete s.addons.trophies; // removed features
+      delete s.reach;
+      // ensure order arrays are present & complete (migration)
+      const def = defaultState();
+      s.factOrder = mergeOrder(raw.factOrder, def.factOrder);
+      s.socialOrder = mergeOrder(raw.socialOrder, def.socialOrder);
+      return s;
+    }
+  } catch (e) {}
+  return defaultState();
+}
+function mergeOrder(saved, def) {
+  const a = Array.isArray(saved) ? saved.filter((k) => def.includes(k)) : [];
+  def.forEach((k) => { if (!a.includes(k)) a.push(k); });
+  return a;
+}
+function persist() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+
+// ─── output-safety helpers ───────────────────────────────────────────────────
+// User input flows into generated HTML/markdown that is later parsed with
+// innerHTML, so every user-derived value must be escaped before it is emitted.
+// escapeHtml: full escape for HTML *attribute* contexts (href, alt, ...).
+function escapeHtml(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+// escapeMdText: lighter escape for markdown body text (keeps raw output clean
+// while still neutralizing raw-HTML injection).
+function escapeMdText(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+// Build a safe github.com profile URL from a (possibly empty) username.
+function ghProfileUrl(user) {
+  return "https://github.com/" + encodeURIComponent((user || "your-username").trim());
+}
+
+// ─── theme ───
+function applyThemeIcon() {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  document.getElementById("themeBtn").innerHTML = dark
+    ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+    : '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute("data-theme");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("ghprofile.theme", next); } catch (e) {}
+  applyThemeIcon();
+  render();
+}
+(function initTheme() {
+  try {
+    const saved = localStorage.getItem("ghprofile.theme");
+    if (saved) document.documentElement.setAttribute("data-theme", saved);
+  } catch (e) {}
+})();
+
+// ─── accent color ───
+function setAccent(hex) {
+  state.accent = hex;
+  const r = document.documentElement;
+  r.style.setProperty("--accent", hex);
+  r.style.setProperty("--green", hex);
+  r.style.setProperty("--green-emph", `color-mix(in oklab, ${hex}, #000 18%)`);
+  r.style.setProperty("--green-hover", `color-mix(in oklab, ${hex}, #000 4%)`);
+  document.querySelectorAll(".swatch").forEach((s) =>
+    s.classList.toggle("on", s.dataset.hex && s.dataset.hex.toLowerCase() === hex.toLowerCase()));
+  const ci = document.getElementById("customColor");
+  if (ci) ci.value = hex;
+  persist();
+  render();
+}
+function buildPalette() {
+  const wrap = document.getElementById("swatches");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  THEME_COLORS.forEach((c) => {
+    const b = document.createElement("button");
+    b.className = "swatch";
+    b.dataset.hex = c.hex;
+    b.style.background = c.hex;
+    b.title = c.name;
+    b.setAttribute("aria-label", c.name);
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>';
+    b.onclick = () => setAccent(c.hex);
+    wrap.appendChild(b);
+  });
+}
+function togglePalette(force) {
+  const pop = document.getElementById("palettePop");
+  const open = force === false ? false : (force === true ? true : pop.classList.contains("open") ? false : true);
+  pop.classList.toggle("open", open);
+}
+document.addEventListener("click", (e) => {
+  const pop = document.getElementById("palettePop");
+  if (pop && pop.classList.contains("open") && !pop.contains(e.target) && !e.target.closest("#paletteBtn")) {
+    pop.classList.remove("open");
+  }
+});
+
+// ─── stepper ───
+function buildStepper() {
+  const el = document.getElementById("stepper");
+  el.innerHTML = "";
+  STEPS.forEach((name, i) => {
+    const item = document.createElement("div");
+    item.className = "stepper-item" + (i === step ? " active" : "") + (i < step ? " done" : "");
+    item.onclick = () => goStep(i);
+    const done = i < step;
+    item.innerHTML =
+      `<div class="step-dot">${done ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>' : (i + 1)}</div>` +
+      `<span class="step-name">${name}</span>`;
+    el.appendChild(item);
+    if (i < STEPS.length - 1) {
+      const line = document.createElement("div");
+      line.className = "step-line" + (i < step ? " filled" : "");
+      el.appendChild(line);
+    }
+  });
+}
+
+function goStep(i) {
+  step = Math.max(0, Math.min(STEPS.length - 1, i));
+  document.querySelectorAll(".step").forEach((s, idx) => s.classList.toggle("active", idx === step));
+  buildStepper();
+  document.getElementById("backBtn").style.visibility = step === 0 ? "hidden" : "visible";
+  document.getElementById("nextLabel").textContent = step === STEPS.length - 1 ? "Finish" : "Continue";
+  document.querySelector(".pane-form").scrollTo({ top: 0, behavior: "smooth" });
+}
+function next() {
+  if (step === STEPS.length - 1) { showFinish(); return; }
+  goStep(step + 1);
+}
+function prev() { goStep(step - 1); }
+
+// ─── bind text inputs ───
+function bindInputs() {
+  document.querySelectorAll("[data-key]").forEach((inp) => {
+    const k = inp.getAttribute("data-key");
+    if (state[k]) inp.value = state[k];
+    inp.addEventListener("input", () => { state[k] = inp.value; persist(); render(); });
+  });
+}
+
+// ─── tech chips ───
+function buildCatalog() {
+  const wrap = document.getElementById("catalog");
+  wrap.innerHTML = "";
+  Object.entries(TECH).forEach(([cat, items]) => {
+    state.tech[cat] = state.tech[cat] || [];
+    const sel = state.tech[cat];
+    const block = document.createElement("div");
+    block.className = "cat";
+    block.innerHTML = `<div class="cat-head"><span class="cat-name">${cat}</span><span class="cat-count" data-cat="${cat}">${sel.length} selected</span></div>`;
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    Object.entries(items).forEach(([name, cfg]) => {
+      const chip = document.createElement("button");
+      chip.className = "chip" + (sel.includes(name) ? " on" : "");
+      chip.innerHTML =
+        `<span class="chip-dot" style="background:#${cfg.color}"></span>${name}` +
+        `<span class="chip-check"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg></span>`;
+      chip.onclick = () => {
+        const arr = state.tech[cat];
+        const at = arr.indexOf(name);
+        if (at >= 0) arr.splice(at, 1); else arr.push(name);
+        chip.classList.toggle("on", at < 0);
+        document.querySelector(`[data-cat="${CSS.escape(cat)}"]`).textContent = arr.length + " selected";
+        persist(); render();
+      };
+      chips.appendChild(chip);
+    });
+    block.appendChild(chips);
+    wrap.appendChild(block);
+  });
+}
+
+// ─── generic drag-to-reorder helper (pointer-based, works on touch + mouse) ───
+function makeSortable(container, getOrder, setOrder) {
+  let dragEl = null;
+  container.querySelectorAll("[data-sort-id]").forEach((row) => {
+    const handle = row.querySelector(".drag-handle");
+    if (!handle) return;
+    handle.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      dragEl = row;
+      row.classList.add("dragging");
+      const move = (ev) => {
+        const after = [...container.querySelectorAll("[data-sort-id]:not(.dragging)")].find((el) => {
+          const r = el.getBoundingClientRect();
+          return ev.clientY < r.top + r.height / 2;
+        });
+        if (after) container.insertBefore(dragEl, after);
+        else container.appendChild(dragEl);
+      };
+      const up = () => {
+        document.removeEventListener("pointermove", move);
+        document.removeEventListener("pointerup", up);
+        row.classList.remove("dragging");
+        const newOrder = [...container.querySelectorAll("[data-sort-id]")].map((el) => el.getAttribute("data-sort-id"));
+        setOrder(newOrder);
+        dragEl = null;
+        persist(); render();
+      };
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", up);
+    });
+  });
+}
+
+// ─── about fact fields (dynamic + draggable) ───
+function buildAboutFields() {
+  const wrap = document.getElementById("aboutFields");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  state.factOrder.forEach((key) => {
+    const cfg = ABOUT_FIELDS[key];
+    if (!cfg) return;
+    const row = document.createElement("div");
+    row.className = "sort-row";
+    row.setAttribute("data-sort-id", key);
+    row.innerHTML =
+      `<button class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button>` +
+      `<div class="sort-body"><label class="field-label">${cfg.emoji} ${cfg.label} <span class="opt">— optional</span></label>` +
+      `<input class="input" placeholder="${cfg.placeholder}" data-fact="${key}" /></div>`;
+    wrap.appendChild(row);
+    const inp = row.querySelector("input");
+    if (state[key]) inp.value = state[key];
+    inp.addEventListener("input", () => { state[key] = inp.value; persist(); render(); });
+  });
+  makeSortable(wrap, () => state.factOrder, (o) => { state.factOrder = o; });
+}
+
+// ─── socials (dynamic + draggable) ───
+function buildSocials() {
+  const wrap = document.getElementById("socials");
+  wrap.innerHTML = "";
+  state.socialOrder.forEach((key) => {
+    const cfg = SOCIALS[key];
+    if (!cfg) return;
+    const row = document.createElement("div");
+    row.className = "sort-row social-row";
+    row.setAttribute("data-sort-id", key);
+    row.innerHTML =
+      `<button class="drag-handle" aria-label="Drag to reorder" title="Drag to reorder"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></button>` +
+      `<div class="social-ic" style="background:#${cfg.color}">${cfg.label.charAt(0)}</div>` +
+      `<div class="sort-body"><input class="input" placeholder="${cfg.input}" data-social="${key}"/></div>`;
+    wrap.appendChild(row);
+    const inp = row.querySelector("input");
+    if (state.socials[key]) inp.value = state.socials[key];
+    inp.addEventListener("input", () => {
+      const v = inp.value.trim();
+      if (v) state.socials[key] = v; else delete state.socials[key];
+      persist(); render();
+    });
+  });
+  makeSortable(wrap, () => state.socialOrder, (o) => { state.socialOrder = o; });
+}
+
+// ─── add-ons ───
+const ADDONS = [
+  { key: "stats", title: "GitHub stats card", desc: "Stars, commits, PRs and issues at a glance." },
+  { key: "langs", title: "Top languages", desc: "Most-used languages across your repositories." },
+  { key: "activity", title: "Contribution activity graph", desc: "A themed line graph of your recent activity." },
+  { key: "quote", title: "Random dev quote", desc: "A developer quote that refreshes on every visit." },
+  { key: "devto", title: "DEV.to articles", desc: "Your latest blog posts from DEV.to — live feed." },
+];
+function buildAddons() {
+  const wrap = document.getElementById("addons");
+  wrap.innerHTML = "";
+  ADDONS.forEach((a) => {
+    const row = document.createElement("div");
+    row.className = "toggle-row" + (state.addons[a.key] ? " on" : "");
+    row.innerHTML =
+      `<div class="switch"></div><div class="toggle-text"><div class="toggle-title">${a.title}</div><div class="toggle-desc">${a.desc}</div></div>`;
+    row.onclick = () => {
+      state.addons[a.key] = !state.addons[a.key];
+      row.classList.toggle("on", state.addons[a.key]);
+      buildDevToConfig();
+      persist();
+      // If enabling DEV.to, fetch articles
+      if (a.key === "devto" && state.addons[a.key]) {
+        refreshDevToCache();
+      } else {
+        render();
+      }
+    };
+    wrap.appendChild(row);
+    
+    // DEV.to config fields (hidden by default)
+    if (a.key === "devto") {
+      const config = document.createElement("div");
+      config.id = "devtoConfig";
+      config.className = "devto-config" + (state.addons.devto ? " show" : "");
+      config.innerHTML = `
+        <div class="field">
+          <label class="field-label" for="f_devtoUsername">DEV.to username</label>
+          <div class="input-prefixed">
+            <span class="input-prefix">dev.to/</span>
+            <input class="input" id="f_devtoUsername" data-key="devtoUsername" placeholder="yourname" autocomplete="off" />
+          </div>
+          <div class="field-hint">Your DEV.to username or profile URL. Your latest articles will appear in the preview.</div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f_devtoPostCount">Number of posts to display</label>
+          <input class="input" type="number" id="f_devtoPostCount" data-key="devtoPostCount" min="1" max="20" />
+          <div class="field-hint">Show between 1–20 of your latest DEV.to posts.</div>
+        </div>
+      `;
+      wrap.appendChild(config);
+    }
+  });
+  buildDevToConfig();
+}
+
+function buildDevToConfig() {
+  const config = document.getElementById("devtoConfig");
+  if (config) {
+    config.classList.toggle("show", state.addons.devto);
+    if (state.addons.devto) {
+      const inputs = config.querySelectorAll("input[data-key]");
+      inputs.forEach((inp) => {
+        const k = inp.getAttribute("data-key");
+        if (state[k] !== undefined) inp.value = state[k];
+        inp.addEventListener("input", () => {
+          state[k] = inp.type === "number" ? parseInt(inp.value) || 5 : inp.value;
+          persist();
+          if (k === "devtoUsername" || k === "devtoPostCount") {
+            refreshDevToCache();
+          } else {
+            render();
+          }
+        });
+      });
+    }
+  }
+}
+
+// strip protocol, path, and stray whitespace from a user-entered host
+function normalizeHost(v) {
+  return String(v || "").trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "").replace(/\s+/g, "");
+}
+
+// ─── DEV.to helpers ───
+// Normalize DEV.to username from username or profile URL
+function normalizeDevToUsername(input) {
+  if (!input) return "";
+  input = input.trim();
+  // If it's a URL, extract username
+  if (input.includes("/")) {
+    const match = input.match(/dev\.to\/([a-zA-Z0-9_]+)/);
+    return match ? match[1] : input.split("/").pop();
+  }
+  return input;
+}
+
+// Fetch DEV.to articles via API
+async function fetchDevToArticles(username, limit = 5) {
+  if (!username) return [];
+  try {
+    const url = `https://dev.to/api/articles?username=${encodeURIComponent(username)}&per_page=${limit}`;
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    const articles = await response.json();
+    return Array.isArray(articles) ? articles : [];
+  } catch (e) {
+    console.error("DEV.to fetch error:", e);
+    return [];
+  }
+}
+
+// Generate DEV.to markdown section (for GitHub Action or export)
+function devToMarkdown(username, articles) {
+  if (!username || !articles.length) return "";
+  const lines = [];
+  lines.push("<!-- DEVTO:START -->");
+  lines.push("### 📝 Latest DEV.to Articles");
+  lines.push("");
+  articles.slice(0, 10).forEach((article) => {
+    const title = escapeMdText(article.title || "");
+    const url = article.url || "";
+    const date = article.published_at ? new Date(article.published_at).toLocaleDateString() : "";
+    const coverImage = article.cover_image || article.social_image || "";
+    
+    if (coverImage) {
+      lines.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`);
+      lines.push(`  <img src="${escapeHtml(coverImage)}" alt="${escapeHtml(title)}" width="100%" style="border-radius:8px;margin-bottom:8px;" />`);
+      lines.push(`</a>`);
+    }
+    lines.push(`**[${title}](${url})**${date ? ` — ${date}` : ""}`);
+    if (article.description) {
+      const desc = escapeMdText((article.description || "").substring(0, 120));
+      lines.push(`  \n${desc}...`);
+    }
+    lines.push("");
+  });
+  lines.push("<!-- DEVTO:END -->");
+  return lines.join("\n");
+}
+
+// Refresh DEV.to cache (call when username/count changes)
+async function refreshDevToCache() {
+  const username = normalizeDevToUsername(state.devtoUsername);
+  if (!username) {
+    state.devtoCache = { articles: [], lastFetch: 0, error: "" };
+    persist(); render();
+    return;
+  }
+  
+  // Don't fetch more than once every 5 seconds in UI (prevent rapid requests)
+  const now = Date.now();
+  if (state.devtoCache.lastFetch && now - state.devtoCache.lastFetch < 5000) return;
+  
+  try {
+    const articles = await fetchDevToArticles(username, state.devtoPostCount || 5);
+    state.devtoCache = { articles, lastFetch: now, error: articles.length === 0 ? "No articles found" : "" };
+  } catch (e) {
+    state.devtoCache = { articles: [], lastFetch: now, error: String(e) };
+  }
+  persist(); render();
+}
+
+// ─── markdown generation ───
+function statTheme() {
+  return document.documentElement.getAttribute("data-theme") === "dark" ? "tokyonight" : "default";
+}
+
+function generate() {
+  const s = state;
+  const user = (s.username || "").trim();
+  const uEnc = encodeURIComponent(user); // safe for API query strings
+  const ac = (s.accent || "#2ea043").replace("#", "");
+  const a = s.addons;
+  const th = statTheme();
+  const L = [];
+
+  // ───────── HERO: static colored header + moving colored headlines ─────────
+  const typeLines = [];
+  if (s.tagline.trim()) typeLines.push(s.tagline.trim());
+  if (s.tagline2.trim()) typeLines.push(s.tagline2.trim());
+  const linesParam = typeLines.map((l) => encodeURIComponent(l)).join(";");
+  const longest = typeLines.reduce((m, l) => Math.max(m, l.length), 0);
+  const subWidth = Math.min(900, Math.max(360, longest * 15 + 40));
+  const hlc = (s.headlineColor || "#a371f7").replace("#", ""); // headline color
+
+  // Big header: whatever the user types in the single Header field.
+  const greeting = (s.greeting == null ? "Hello! I'm" : s.greeting).trim();
+
+  // Header — STATIC, colored (no motion), one line, larger than the headlines.
+  if (greeting) {
+    const headerWidth = Math.min(1200, Math.max(420, greeting.length * 32 + 90));
+    L.push(`<p align="center">`);
+    L.push(`  <a href="${ghProfileUrl(user)}">`);
+    L.push(`    <img src="https://capsule-render.vercel.app/api?type=transparent&fontColor=${ac}&fontSize=54&height=90&width=${headerWidth}&text=${encodeURIComponent(greeting)}" alt="${escapeHtml(greeting)}" />`);
+    L.push(`  </a>`);
+    L.push(`</p>`);
+  }
+
+  // Headlines 1 & 2 — MOVING (typed), a different color, smaller than the header.
+  if (typeLines.length) {
+    L.push("");
+    L.push(`<p align="center">`);
+    L.push(`  <img src="https://readme-typing-svg.demolab.com?font=Caveat&weight=600&size=26&pause=1000&color=${hlc}&center=true&vCenter=true&width=${subWidth}&height=44&lines=${linesParam}" alt="Typing headlines" />`);
+    L.push(`</p>`);
+  }
+  L.push("");
+  L.push("");
+
+  // ───────── ABOUT ─────────
+  const facts = [];
+  state.factOrder.forEach((key) => {
+    const cfg = ABOUT_FIELDS[key];
+    const val = (s[key] || "").trim();
+    if (!cfg || !val) return;
+    facts.push(`${cfg.emoji} &nbsp;${cfg.lead} **${escapeMdText(val)}**`);
+  });
+  if (s.bio.trim() || facts.length) {
+    L.push("### 🚀 About Me");
+    L.push("");
+    if (s.bio.trim()) {
+      L.push(escapeMdText(s.bio.trim()).split("\n").filter((l) => l.trim()).join("  \n"));
+      L.push("");
+    }
+    if (facts.length) { L.push(facts.join("  \n")); L.push(""); }
+  }
+
+  // ───────── TECH STACK (one combined block) ─────────
+  const allTech = [];
+  Object.entries(TECH).forEach(([cat, items]) => {
+    (s.tech[cat] || []).forEach((n) => { if (items[n]) allTech.push([n, items[n]]); });
+  });
+  if (allTech.length) {
+    L.push("### 🛠️ Tech Stack");
+    L.push("");
+    L.push(`<p align="left">`);
+    L.push(allTech.map(([n, cfg]) => `  <img src="${badgeUrl(n, cfg, s.badgeStyle)}" alt="${escapeHtml(n)}" />`).join("\n"));
+    L.push(`</p>`);
+    L.push("");
+  }
+
+  // ───────── CONNECT ─────────
+  const socialBadges = [];
+  state.socialOrder.forEach((key) => {
+    const cfg = SOCIALS[key];
+    let v = (s.socials[key] || "").trim();
+    if (!cfg || !v) return;
+    const href = /^https?:\/\//.test(v) || v.startsWith("mailto:") ? v : cfg.prefix + v;
+    socialBadges.push(`  <a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/${shEscape(cfg.label)}-${cfg.color}?style=${s.badgeStyle}&logo=${cfg.logo}&logoColor=white" alt="${escapeHtml(cfg.label)}" /></a>`);
+  });
+  if (socialBadges.length) {
+    L.push("### 🔗 Connect With Me");
+    L.push("");
+    L.push(`<p align="left">`);
+    L.push(socialBadges.join("\n"));
+    L.push(`</p>`);
+    L.push("");
+  }
+
+  // ───────── STATS ─────────
+  const cardColors = `&title_color=${ac}&icon_color=${ac}&hide_border=true&bg_color=00000000`;
+  const sText = th === "default" ? "1f2328" : "c9d1d9";
+  const sDate = th === "default" ? "656d76" : "8b949e";
+  // Your own github-readme-stats instance (reliable for all users of this app).
+  const statsHost = normalizeHost(s.statsHost) || "github-readme-stats-five-sigma-99.vercel.app";
+  if (user && (a.stats || a.langs)) {
+    L.push("### 📊 GitHub Stats");
+    L.push("");
+    L.push(`<p align="center">`);
+    if (a.stats) L.push(`  <img height="165" src="https://${statsHost}/api?username=${uEnc}&show_icons=true&theme=${th}${cardColors}&count_private=true" alt="stats" />`);
+    if (a.langs) L.push(`  <img height="165" src="https://${statsHost}/api/top-langs/?username=${uEnc}&layout=compact&theme=${th}${cardColors}&langs_count=8" alt="top langs" />`);
+    L.push(`</p>`);
+    L.push("");
+  }
+  if (user && a.activity) {
+    L.push("### 📈 Contribution Graph");
+    L.push("");
+    L.push(`<p align="center">`);
+    L.push(`  <img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=${uEnc}&bg_color=00000000&color=${ac}&line=${ac}&point=${sText}&area=true&hide_border=true" alt="activity graph" />`);
+    L.push(`</p>`);
+    L.push("");
+  }
+
+  // ───────── DEV QUOTE ─────────
+  // Plain centered quote — no decorative frame (the service's own border
+  // clips on tall quotes, so we render the quote borderless).
+  if (a.quote) {
+    L.push("### 💭 Dev Quote");
+    L.push("");
+    L.push(`<p align="center">`);
+    L.push(`  <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=${th}" alt="Dev quote" />`);
+    L.push(`</p>`);
+    L.push("");
+  }
+
+  // ───────── DEV.TO ARTICLES ─────────
+  const devtoUser = normalizeDevToUsername(s.devtoUsername);
+  if (a.devto && devtoUser && s.devtoCache && s.devtoCache.articles.length) {
+    L.push("### 📝 Latest DEV.to Articles");
+    L.push("");
+    s.devtoCache.articles.slice(0, s.devtoPostCount || 5).forEach((article) => {
+      const title = escapeMdText(article.title || "");
+      const url = article.url || "";
+      const date = article.published_at ? new Date(article.published_at).toLocaleDateString() : "";
+      const coverImage = article.cover_image || article.social_image || "";
+      
+      if (coverImage) {
+        // Include cover image with alt text, clickable to article
+        L.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`);
+        L.push(`  <img src="${escapeHtml(coverImage)}" alt="${escapeHtml(title)}" width="100%" style="border-radius:8px;margin-bottom:8px;" />`);
+        L.push(`</a>`);
+      }
+      L.push(`**[${title}](${url})**${date ? ` — ${date}` : ""}`);
+      if (article.description) {
+        const desc = escapeMdText((article.description || "").substring(0, 120));
+        L.push(`  \n${desc}...`);
+      }
+      L.push("");
+    });
+    L.push("");
+  }
+
+  // ───────── FOOTER ─────────
+  L.push("---");
+  L.push(`<p align="center"><i>⭐️ From <a href="${ghProfileUrl(user)}">${escapeMdText(user || "your-username")}</a></i></p>`);
+
+  return L.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
+}
+
+// ─── render preview ───
+function render() {
+  const md = generate();
+  document.getElementById("previewRaw").textContent = md;
+  const rendered = document.getElementById("previewRendered");
+  const hasUser = (state.username || "").trim();
+  if (!hasUser) {
+    rendered.innerHTML = `<div class="empty-preview"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><div>Enter your <b>GitHub username</b> to start —<br/>your README preview appears here, live.</div></div>`;
+    return;
+  }
+  if (window.marked) {
+    rendered.innerHTML = marked.parse(md);
+    // tag badge paragraphs for spacing
+    rendered.querySelectorAll("p, h3").forEach((p) => {
+      if (p.querySelector('img[src*="shields.io"]')) p.classList.add("md-badges");
+    });
+    // external widget images can 404 / cold-start — retry once, then show a
+    // tidy placeholder (these services rate-limit their public demo instances,
+    // but the widget still renders on the user's real GitHub profile).
+    rendered.querySelectorAll('img[src*="vercel.app"], img[src*="herokuapp.com"], img[src*="demolab.com"], img[src*="komarev.com"], img[src*="githubusercontent.com"]').forEach((img) => {
+      img.referrerPolicy = "no-referrer";
+      let retried = false;
+      img.addEventListener("error", () => {
+        if (!retried) {
+          retried = true;
+          let base = img.src.split(/[?&]_retry=/)[0];
+          // if a stats card on our own instance is down, fall back to the
+          // public github-readme-stats service before giving up.
+          if (base.includes("github-readme-stats-five-sigma-99.vercel.app")) {
+            base = base.replace("github-readme-stats-five-sigma-99.vercel.app", "github-readme-stats.vercel.app");
+          }
+          const sep = base.includes("?") ? "&" : "?";
+          setTimeout(() => { img.src = base + sep + "_retry=" + Date.now(); }, 1200);
+          return;
+        }
+        // give up: swap for a labeled placeholder
+        const label = img.alt || "widget";
+        const ph = document.createElement("span");
+        ph.className = "widget-fallback";
+        ph.innerHTML =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-4 4"/></svg>' +
+          '<b>' + escapeHtml(label) + '</b><i>Renders on your live profile</i>';
+        if (img.parentNode) img.parentNode.replaceChild(ph, img);
+      });
+    });
+    // dev quote — click to shuffle a fresh one in the preview
+    const quote = rendered.querySelector('img[src*="quotes-github-readme"]');
+    if (quote) {
+      const wrap = quote.closest("p") || quote.parentElement;
+      if (wrap && !(wrap.nextElementSibling && wrap.nextElementSibling.classList.contains("quote-refresh"))) {
+        quote.style.cursor = "pointer";
+        quote.title = "Click for a new quote";
+        const btn = document.createElement("button");
+        btn.className = "quote-refresh";
+        btn.type = "button";
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> New quote';
+        const shuffle = () => { const base = quote.src.split("&_r=")[0]; quote.src = base + "&_r=" + Date.now(); };
+        quote.addEventListener("click", shuffle);
+        btn.addEventListener("click", shuffle);
+        wrap.insertAdjacentElement("afterend", btn);
+      }
+    }
+  } else {
+    rendered.innerHTML = "<pre>" + escapeHtml(md) + "</pre>";
+  }
+}
+
+// ─── preview tabs ───
+function setPreviewMode(mode) {
+  previewMode = mode;
+  document.getElementById("tabPreview").classList.toggle("on", mode === "preview");
+  document.getElementById("tabRaw").classList.toggle("on", mode === "raw");
+  document.getElementById("previewRendered").hidden = mode !== "preview";
+  document.getElementById("previewRaw").hidden = mode !== "raw";
+}
+
+// ─── actions ───
+function flash(msg) {
+  const old = document.querySelector(".toast");
+  if (old) old.remove();
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+function copyMd() {
+  navigator.clipboard.writeText(generate()).then(() => flash("Markdown copied to clipboard")).catch(() => flash("Copy failed — select the Markdown tab"));
+}
+function downloadMd() {
+  const blob = new Blob([generate()], { type: "text/markdown" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "README.md";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  flash("README.md downloaded");
+}
+function resetAll() {
+  if (!confirm("Clear all fields and start over?")) return;
+  doReset();
+  flash("Cleared");
+}
+function doReset() {
+  const accent = state.accent;
+  state = defaultState();
+  state.accent = accent; // keep chosen theme
+  persist();
+  document.querySelectorAll("[data-key]").forEach((i) => (i.value = ""));
+  document.querySelectorAll("#socials input").forEach((i) => (i.value = ""));
+  const gEl = document.getElementById("f_greeting"); if (gEl) gEl.value = state.greeting;
+  buildCatalog(); buildSocials(); buildAboutFields(); buildAddons(); buildHeadlineColors();
+  goStep(0); render();
+}
+
+// ─── finish view (in the left pane) ───
+function showFinish() {
+  const u = (state.username || "your-username").trim();
+  document.getElementById("finishUser").textContent = u;
+  document.getElementById("finishRepo").textContent = u;
+  document.getElementById("wizardView").style.display = "none";
+  document.getElementById("finishView").classList.add("show");
+  const pane = document.querySelector(".pane-form");
+  if (pane) pane.scrollTo({ top: 0 });
+}
+function closeFinish() {
+  document.getElementById("finishView").classList.remove("show");
+  document.getElementById("wizardView").style.display = "";
+}
+function createAnother() {
+  closeFinish();
+  if (confirm("Start a fresh profile? This clears the current one.")) { doReset(); flash("New profile started"); }
+}
+async function shareProfile() {
+  const md = generate();
+  if (navigator.share) {
+    try { await navigator.share({ title: "My GitHub profile README", text: md }); return; } catch (e) {}
+  }
+  try { await navigator.clipboard.writeText(md); flash("README copied — paste it anywhere to share"); }
+  catch (e) { flash("Select the Markdown tab to copy"); }
+}
+function toggleMobilePreview(force) {
+  const on = force === true ? true : !document.body.classList.contains("show-preview");
+  document.body.classList.toggle("show-preview", on);
+  document.getElementById("mobilePreviewBtn").innerHTML = on
+    ? '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg> Edit'
+    : '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Preview';
+}
+
+// ─── wire up DOM events (no inline handlers — CSP-friendly) ───
+function on(id, evt, fn) { const el = document.getElementById(id); if (el) el.addEventListener(evt, fn); }
+function wireEvents() {
+  on("mobilePreviewBtn", "click", () => toggleMobilePreview());
+  on("paletteBtn", "click", () => togglePalette());
+  on("customColor", "input", (e) => setAccent(e.target.value));
+  on("themeBtn", "click", toggleTheme);
+  on("resetBtn", "click", resetAll);
+  on("backBtn", "click", prev);
+  on("nextBtn", "click", next);
+  on("tabPreview", "click", () => setPreviewMode("preview"));
+  on("tabRaw", "click", () => setPreviewMode("raw"));
+  on("copyBtn", "click", copyMd);
+  on("downloadBtn", "click", downloadMd);
+  on("finishDownloadBtn", "click", downloadMd);
+  on("finishCopyBtn", "click", copyMd);
+  on("finishShareBtn", "click", shareProfile);
+  on("finishBackBtn", "click", closeFinish);
+  on("finishAnotherBtn", "click", createAnother);
+  // hero: greeting text + animate toggle
+  const g = document.getElementById("f_greeting");
+  if (g) { g.value = state.greeting == null ? "Hello! I'm" : state.greeting; g.addEventListener("input", () => { state.greeting = g.value; persist(); render(); }); }
+  buildHeadlineColors();
+}
+
+// swatches to pick the (separate) color for the moving headline lines
+const HL_COLORS = ["#a371f7", "#2f81f7", "#f778ba", "#3fb950", "#e3b341", "#ff7b72", "#56d4dd", "#ff9bce"];
+function buildHeadlineColors() {
+  const wrap = document.getElementById("hlSwatches");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  HL_COLORS.forEach((c) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "hl-swatch" + (String(state.headlineColor).toLowerCase() === c ? " on" : "");
+    b.style.background = c;
+    b.style.color = c;
+    b.title = c;
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    b.addEventListener("click", () => { state.headlineColor = c; buildHeadlineColors(); persist(); render(); });
+    wrap.appendChild(b);
+  });
+}
+
+// ─── init ───
+if (window.marked) marked.setOptions({ breaks: true, gfm: true });
+wireEvents();
+buildStepper();
+bindInputs();
+buildAboutFields();
+buildCatalog();
+buildSocials();
+buildAddons();
+buildPalette();
+applyThemeIcon();
+setAccent(state.accent || "#2ea043");
+goStep(0);
+render();

@@ -1,0 +1,183 @@
+name: Update DEV.to Articles
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'DEV.to username'
+        required: false
+      post_count:
+        description: 'Number of posts to display'
+        required: false
+        default: '5'
+
+jobs:
+  update-devto:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Update DEV.to Articles
+        env:
+          DEVTO_USERNAME: ${{ github.event.inputs.username }}
+          POST_COUNT: ${{ github.event.inputs.post_count || '5' }}
+        run: |
+          # Read DEV.to username from inputs or from git config if available
+          USERNAME="${DEVTO_USERNAME}"
+          if [ -z "$USERNAME" ]; then
+            # Try to get from git config (would need to be set in user's repo)
+            USERNAME=$(git config --local devto.username 2>/dev/null || echo "")
+          fi
+          
+          if [ -z "$USERNAME" ]; then
+            echo "DEV.to username not provided. Set DEVTO_USERNAME input or run: git config --local devto.username YOUR_USERNAME"
+            exit 0
+          fi
+          
+          # Install required tools
+          npm install xml2js --save-dev --silent
+          
+          # Run the update script
+          node << 'EOF'
+          const fs = require('fs');
+          const https = require('https');
+          const xml2js = require('xml2js');
+          
+          const username = process.env.DEVTO_USERNAME;
+          const postCount = parseInt(process.env.POST_COUNT) || 5;
+          const readmePath = 'README.md';
+          
+          if (!fs.existsSync(readmePath)) {
+            console.log('README.md not found, skipping update');
+            process.exit(0);
+          }
+          
+          // Fetch RSS feed
+          function fetchRSS(url) {
+            return new Promise((resolve, reject) => {
+              https.get(url, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => resolve(data));
+              }).on('error', reject);
+            });
+          }
+          
+          // Parse RSS and extract articles
+          async function getArticles(username) {
+            try {
+              const rssUrl = `https://dev.to/feed/${username}`;
+              const rssData = await fetchRSS(rssUrl);
+              
+              const parser = new xml2js.Parser();
+              const result = await parser.parseStringPromise(rssData);
+              
+              const items = result.rss.channel[0].item || [];
+              return items.slice(0, postCount).map(item => {
+                // Try to extract image from media:content or enclosure
+                let image = '';
+                if (item['media:content'] && item['media:content'][0] && item['media:content'][0].$['url']) {
+                  image = item['media:content'][0].$['url'];
+                } else if (item['enclosure'] && item['enclosure'][0] && item['enclosure'][0].$['url']) {
+                  image = item['enclosure'][0].$['url'];
+                }
+                
+                return {
+                  title: item.title[0],
+                  link: item.link[0],
+                  pubDate: item.pubDate[0],
+                  image: image
+                };
+              });
+            } catch (err) {
+              console.error('Error fetching DEV.to RSS:', err.message);
+              return [];
+            }
+          }
+          
+          // Generate markdown section
+          function generateMarkdown(articles) {
+            if (articles.length === 0) {
+              return '<!-- DEVTO:START -->\n<!-- DEVTO:END -->';
+            }
+            
+            const lines = [
+              '<!-- DEVTO:START -->',
+              '### 📝 Latest DEV.to Articles',
+              ''
+            ];
+            
+            articles.forEach(article => {
+              const date = new Date(article.pubDate).toLocaleDateString();
+              
+              // Include cover image if available
+              if (article.image) {
+                lines.push(`<a href="${article.link}" target="_blank" rel="noopener noreferrer">`);
+                lines.push(`  <img src="${article.image}" alt="${article.title}" width="100%" style="border-radius:8px;margin-bottom:8px;" />`);
+                lines.push(`</a>`);
+              }
+              
+              lines.push(`**[${article.title}](${article.link})** — ${date}`);
+              lines.push('');
+            });
+            
+            lines.push('<!-- DEVTO:END -->');
+            
+            return lines.join('\n');
+          }
+          
+          // Update README
+          async function updateReadme(username) {
+            const articles = await getArticles(username);
+            const newContent = generateMarkdown(articles);
+            
+            let readme = fs.readFileSync(readmePath, 'utf8');
+            const startMarker = '<!-- DEVTO:START -->';
+            const endMarker = '<!-- DEVTO:END -->';
+            
+            if (!readme.includes(startMarker) || !readme.includes(endMarker)) {
+              console.log('DEV.to markers not found in README.md');
+              process.exit(0);
+            }
+            
+            const startIdx = readme.indexOf(startMarker);
+            const endIdx = readme.indexOf(endMarker) + endMarker.length;
+            const oldContent = readme.substring(startIdx, endIdx);
+            
+            if (oldContent === newContent) {
+              console.log('No changes to DEV.to articles');
+              process.exit(0);
+            }
+            
+            const updatedReadme = readme.substring(0, startIdx) + newContent + readme.substring(endIdx);
+            fs.writeFileSync(readmePath, updatedReadme, 'utf8');
+            
+            console.log(`Updated README.md with ${articles.length} DEV.to articles`);
+          }
+          
+          updateReadme(username).catch(err => {
+            console.error('Error:', err.message);
+            process.exit(1);
+          });
+          EOF
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          if git diff --quiet README.md 2>/dev/null; then
+            echo "No changes to commit"
+          else
+            git add README.md
+            git commit -m "chore: update DEV.to articles

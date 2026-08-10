@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Profile Studio — GitHub README Builder</title>
+<meta name="description" content="Build a polished GitHub profile README with a live preview — tech badges, stats cards, social links and more." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg class="ic" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">Profile <b>Studio</b></div>
+      <div class="brand-sub">README.md builder</div>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn btn-ghost mobile-preview-btn" id="mobilePreviewBtn" type="button">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      Preview
+    </button>
+    <div class="palette-wrap">
+      <button class="theme-pill" id="paletteBtn" type="button" title="Change theme color" aria-label="Change theme color">
+        <span class="palette-swatch"></span>
+        <span class="theme-pill-label">Theme</span>
+        <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="palette-pop" id="palettePop">
+        <div class="pop-title">Accent color</div>
+        <div class="swatches" id="swatches"></div>
+        <label class="custom-color" title="Click, then drag in the picker to fine-tune">
+          <span class="cc-label">Custom</span>
+          <span class="cc-hint">drag to edit</span>
+          <input type="color" id="customColor" />
+        </label>
+      </div>
+    </div>
+    <button class="icon-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme"></button>
+    <button class="icon-btn" id="resetBtn" type="button" title="Start over" aria-label="Start over">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- FORM PANE -->
+  <section class="pane pane-form">
+    <div class="pane-form-inner" id="wizardView">
+      <div class="stepper" id="stepper"></div>
+
+      <!-- STEP 1: Identity -->
+      <div class="step active" id="step0">
+        <h2 class="step-title">Let's start with the basics</h2>
+        <p class="step-desc">Your username powers the live widgets. The header is the big line at the top; the headlines are the small lines beneath it.</p>
+        <div class="field">
+          <label class="field-label" for="f_username">GitHub username</label>
+          <div class="input-prefixed">
+            <span class="input-prefix">github.com/</span>
+            <input class="input" id="f_username" data-key="username" placeholder="yourusername" autocomplete="off" />
+          </div>
+          <div class="field-hint">Powers your stats cards and dynamic widgets.</div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f_greeting">Header <span class="opt">— the big line at the top</span></label>
+          <input class="input" id="f_greeting" placeholder="Hello! I'm" autocomplete="off" />
+          <div class="field-hint">Type your name after it (“Hello! I’m Anurag”), replace it entirely, or clear it to hide the header.</div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="f_tagline">Headline 1 <span class="opt">— small line under your name</span></label>
+          <input class="input" id="f_tagline" data-key="tagline" placeholder="I do open source :)" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="f_tagline2">Headline 2 <span class="opt">— optional, adds a second animated line</span></label>
+          <input class="input" id="f_tagline2" data-key="tagline2" placeholder="Turning coffee into clean, tested code" />
+        </div>
+        <div class="field">
+          <label class="field-label">Headline color <span class="opt">— for the moving lines (different from the header)</span></label>
+          <div class="hl-swatches" id="hlSwatches"></div>
+        </div>
+      </div>
+
+      <!-- STEP 2: About -->
+      <div class="step" id="step1">
+        <h2 class="step-title">About you</h2>
+        <p class="step-desc">A short intro, plus optional lines. Drag the ⋮⋮ handle to reorder how they appear.</p>
+        <div class="field">
+          <label class="field-label" for="f_bio">Bio</label>
+          <textarea class="textarea" id="f_bio" data-key="bio" placeholder="Software engineer who loves clean APIs, fast feedback loops, and good coffee. I build things for the web and write about what I learn."></textarea>
+        </div>
+        <div class="sortable" id="aboutFields"></div>
+      </div>
+
+      <!-- STEP 3: Tech stack -->
+      <div class="step" id="step2">
+        <h2 class="step-title">Tech stack</h2>
+        <p class="step-desc">Pick what you work with. Each selection becomes a colored badge in your README.</p>
+        <div id="catalog"></div>
+      </div>
+
+      <!-- STEP 4: Socials -->
+      <div class="step" id="step3">
+        <h2 class="step-title">Connect</h2>
+        <p class="step-desc">Add the links you want people to find. Enter just a handle — we'll build the full URL. Drag ⋮⋮ to reorder.</p>
+        <div id="socials"></div>
+      </div>
+
+      <!-- STEP 5: Add-ons -->
+      <div class="step" id="step4">
+        <h2 class="step-title">Dynamic add-ons</h2>
+        <p class="step-desc">Live widgets that auto-update on your real profile. They render from your GitHub username.</p>
+        <div id="addons"></div>
+      </div>
+
+      <!-- NAV -->
+      <div class="btnRow">
+        <button class="btn btn-back" id="backBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary btn-grow" id="nextBtn" type="button">
+          <span id="nextLabel">Continue</span>
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- FINISH (replaces the wizard in this pane) -->
+    <div class="finish-view" id="finishView">
+      <div class="finish-burst">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
+      </div>
+      <h2 class="finish-title">Your README is ready</h2>
+      <p class="finish-sub">Grab the markdown, or start a fresh profile. Publishing it takes about 30 seconds.</p>
+
+      <div class="finish-actions">
+        <button class="btn btn-primary" id="finishDownloadBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
+          Download README.md
+        </button>
+        <button class="btn" id="finishCopyBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy markdown
+        </button>
+        <button class="btn" id="finishShareBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5 8.6 10.5"/></svg>
+          Share
+        </button>
+      </div>
+
+      <div class="publish">
+        <div class="publish-title">Publish it to your profile</div>
+        <ol class="publish-steps">
+          <li>Create a new public repo named exactly <code id="finishRepo">your-username</code> (same as your username).</li>
+          <li>Add the <code>README.md</code> file you just downloaded.</li>
+          <li>Visit <code>github.com/<span id="finishUser">your-username</span></code> — it shows on your profile.</li>
+        </ol>
+      </div>
+
+      <div class="finish-foot">
+        <button class="btn btn-ghost" id="finishBackBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          Keep editing
+        </button>
+        <button class="btn btn-grow" id="finishAnotherBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Create another profile
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREVIEW PANE -->
+  <section class="pane pane-preview">
+    <div class="preview-head">
+      <div class="preview-tabs">
+        <button class="ptab on" id="tabPreview" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview
+        </button>
+        <button class="ptab" id="tabRaw" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>
+          Markdown
+        </button>
+      </div>
+      <div class="preview-actions">
+        <button class="btn" id="copyBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy
+        </button>
+        <button class="btn btn-primary" id="downloadBtn" type="button">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
+          Download
+        </button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="md" id="previewRendered"></div>
+      <div class="md-raw" id="previewRaw" hidden></div>
+    </div>
+  </section>
+</div>
+
+<script src="js/catalog.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
