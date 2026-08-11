@@ -78,26 +78,15 @@ function mergeOrder(saved, def) {
 }
 function persist() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
 
-// ─── output-safety helpers ───────────────────────────────────────────────────
-// User input flows into generated HTML/markdown that is later parsed with
-// innerHTML, so every user-derived value must be escaped before it is emitted.
-// escapeHtml: full escape for HTML *attribute* contexts (href, alt, ...).
-function escapeHtml(str) {
-  return String(str == null ? "" : str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-// escapeMdText: lighter escape for markdown body text (keeps raw output clean
-// while still neutralizing raw-HTML injection).
-function escapeMdText(str) {
-  return String(str == null ? "" : str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
+// ─── output-safety helpers ────────────────────────────────────────────────
+// Security primitives live in security.js so they can be independently tested.
+
+const {
+  escapeHtml,
+  escapeMdText,
+  safeUrl,
+} = window.ProfileStudioSecurity;
+
 // Build a safe github.com profile URL from a (possibly empty) username.
 function ghProfileUrl(user) {
   return "https://github.com/" + encodeURIComponent((user || "your-username").trim());
@@ -448,9 +437,12 @@ function devToMarkdown(username, articles) {
   lines.push("");
   articles.slice(0, 10).forEach((article) => {
     const title = escapeMdText(article.title || "");
-    const url = article.url || "";
+    const url = safeUrl(article.url);
     const date = article.published_at ? new Date(article.published_at).toLocaleDateString() : "";
-    const coverImage = article.cover_image || article.social_image || "";
+    const coverImage = safeUrl(
+      article.cover_image || article.social_image,
+      ""
+    );
     
     if (coverImage) {
       lines.push(`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">`);
@@ -650,7 +642,7 @@ if (
 
     articles.forEach((article) => {
       const title = escapeHtml(article.title || "");
-      const url = escapeHtml(article.url || "");
+      const url = safeUrl(article.url);
 
       const date = article.published_at
         ? new Date(article.published_at).toLocaleDateString()
@@ -702,7 +694,7 @@ if (
 
       // Cover image
       if (coverImage) {
-        L.push(`<a href="${url}">`);
+        L.push(`<a href="${escapeHtml(url)}">`);
         L.push(
           `<img src="${escapeHtml(coverImage)}" width="100%" alt="${title}" />`
         );
@@ -790,7 +782,7 @@ if (
 
     articles.forEach((article) => {
       const title = escapeHtml(article.title || "");
-      const url = article.url || "";
+      const url = safeUrl(article.url);
 
       const date = article.published_at
         ? new Date(article.published_at).toLocaleDateString()
