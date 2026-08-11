@@ -1,0 +1,7 @@
+{
+  "name": "profile-studio",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}
