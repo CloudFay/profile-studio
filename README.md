@@ -21,7 +21,7 @@ a contribution graph, and a dev quote.
 
 ## 📋 How to use
 
-1. Open the [live app](https://techwithgen.github.io/profile-studio/).
+1. Open the [live app](https://cloudfay.github.io/profile-studio/).
 2. Enter your GitHub username and fill in the steps.
 3. Click **Download** (or **Copy**) to get your `README.md`.
 4. Create a **public repo named exactly your username**, add the file it shows on your profile.
