@@ -104,7 +104,6 @@ Profile Studio now includes built-in DEV.to support with two complementary featu
 
 ### 📚 DEV.to Integration Documentation
 - **[DEVTO_INTEGRATION.md](./DEVTO_INTEGRATION.md)** — Complete setup guide & troubleshooting
-- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** — Technical architecture & details
 - **[CONTRIBUTORS.md](./CONTRIBUTORS.md)** — Credits & team
 
 ## 👥 Contributors & Credits
