@@ -1,24 +1,6 @@
 // app.js — wizard logic, markdown generation, live preview
 
 const STEPS = ["Identity", "About", "Stack", "Socials", "Add-ons"];
-const LS_KEY = "ghprofile.v2";
-
-const defaultState = () => ({
-  name: "", username: "", tagline: "", tagline2: "",
-  greeting: "Hello! I'm", headlineColor: "#a371f7",
-  bio: "", working: "", learning: "", collab: "", help: "", ask: "", pronouns: "", fun: "",
-  tech: {},          // { category: [names] }
-  socials: {},       // { key: value }
-  factOrder: ["working", "learning", "collab", "help", "ask", "pronouns", "fun"],
-  socialOrder: ["linkedin", "x", "instagram", "tiktok", "youtube", "pinterest", "devto", "website", "email"],
-  addons: { stats: true, langs: true, activity: true, quote: true, devto: false },
-  devtoUsername: "",
-  devtoPostCount: 5,
-  devtoCache: { articles: [], lastFetch: 0, error: "" },
-  statsHost: "",
-  badgeStyle: "for-the-badge",
-  accent: "#2ea043",
-});
 
 // About fact fields (drag-reorderable)
 const ABOUT_FIELDS = {
@@ -49,34 +31,15 @@ const THEME_COLORS = [
   { name: "Slate",       hex: "#5b6573" },
 ];
 
+const {
+  defaultState,
+  load,
+  persist,
+} = window.ProfileStudioState;
+
 let state = load();
 let step = 0;
 let previewMode = "preview";
-
-function load() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(LS_KEY));
-    if (raw && typeof raw === "object") {
-      const s = Object.assign(defaultState(), raw);
-      s.addons = Object.assign(defaultState().addons, raw.addons || {});
-      s.devtoCache = Object.assign(defaultState().devtoCache, raw.devtoCache || {});
-      delete s.addons.views; delete s.addons.trophies; // removed features
-      delete s.reach;
-      // ensure order arrays are present & complete (migration)
-      const def = defaultState();
-      s.factOrder = mergeOrder(raw.factOrder, def.factOrder);
-      s.socialOrder = mergeOrder(raw.socialOrder, def.socialOrder);
-      return s;
-    }
-  } catch (e) {}
-  return defaultState();
-}
-function mergeOrder(saved, def) {
-  const a = Array.isArray(saved) ? saved.filter((k) => def.includes(k)) : [];
-  def.forEach((k) => { if (!a.includes(k)) a.push(k); });
-  return a;
-}
-function persist() { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
 
 // ─── output-safety helpers ────────────────────────────────────────────────
 // Security primitives live in security.js so they can be independently tested.
@@ -132,7 +95,7 @@ function setAccent(hex) {
     s.classList.toggle("on", s.dataset.hex && s.dataset.hex.toLowerCase() === hex.toLowerCase()));
   const ci = document.getElementById("customColor");
   if (ci) ci.value = hex;
-  persist();
+  persist(state);
   render();
 }
 function buildPalette() {
@@ -203,7 +166,7 @@ function bindInputs() {
   document.querySelectorAll("[data-key]").forEach((inp) => {
     const k = inp.getAttribute("data-key");
     if (state[k]) inp.value = state[k];
-    inp.addEventListener("input", () => { state[k] = inp.value; persist(); render(); });
+    inp.addEventListener("input", () => { state[k] = inp.value; persist(state); render(); });
   });
 }
 
@@ -231,7 +194,7 @@ function buildCatalog() {
         if (at >= 0) arr.splice(at, 1); else arr.push(name);
         chip.classList.toggle("on", at < 0);
         document.querySelector(`[data-cat="${CSS.escape(cat)}"]`).textContent = arr.length + " selected";
-        persist(); render();
+        persist(state); render();
       };
       chips.appendChild(chip);
     });
@@ -265,7 +228,7 @@ function makeSortable(container, getOrder, setOrder) {
         const newOrder = [...container.querySelectorAll("[data-sort-id]")].map((el) => el.getAttribute("data-sort-id"));
         setOrder(newOrder);
         dragEl = null;
-        persist(); render();
+        persist(state); render();
       };
       document.addEventListener("pointermove", move);
       document.addEventListener("pointerup", up);
@@ -291,7 +254,7 @@ function buildAboutFields() {
     wrap.appendChild(row);
     const inp = row.querySelector("input");
     if (state[key]) inp.value = state[key];
-    inp.addEventListener("input", () => { state[key] = inp.value; persist(); render(); });
+    inp.addEventListener("input", () => { state[key] = inp.value; persist(state); render(); });
   });
   makeSortable(wrap, () => state.factOrder, (o) => { state.factOrder = o; });
 }
@@ -316,7 +279,7 @@ function buildSocials() {
     inp.addEventListener("input", () => {
       const v = inp.value.trim();
       if (v) state.socials[key] = v; else delete state.socials[key];
-      persist(); render();
+      persist(state); render();
     });
   });
   makeSortable(wrap, () => state.socialOrder, (o) => { state.socialOrder = o; });
@@ -342,7 +305,7 @@ function buildAddons() {
       state.addons[a.key] = !state.addons[a.key];
       row.classList.toggle("on", state.addons[a.key]);
       buildDevToConfig();
-      persist();
+      persist(state);
       // If enabling DEV.to, fetch articles
       if (a.key === "devto" && state.addons[a.key]) {
         refreshDevToCache();
@@ -389,7 +352,7 @@ function buildDevToConfig() {
         if (state[k] !== undefined) inp.value = state[k];
         inp.addEventListener("input", () => {
           state[k] = inp.type === "number" ? parseInt(inp.value) || 5 : inp.value;
-          persist();
+          persist(state);
           if (k === "devtoUsername" || k === "devtoPostCount") {
             refreshDevToCache();
           } else {
@@ -413,7 +376,7 @@ async function refreshDevToCache() {
   const username = normalizeDevToUsername(state.devtoUsername);
   if (!username) {
     state.devtoCache = { articles: [], lastFetch: 0, error: "" };
-    persist(); render();
+    persist(state); render();
     return;
   }
   
@@ -427,7 +390,7 @@ async function refreshDevToCache() {
   } catch (e) {
     state.devtoCache = { articles: [], lastFetch: now, error: String(e) };
   }
-  persist(); render();
+  persist(state); render();
 }
 
 // ─── markdown generation ───
@@ -976,7 +939,7 @@ function doReset() {
   const accent = state.accent;
   state = defaultState();
   state.accent = accent; // keep chosen theme
-  persist();
+  persist(state);
   document.querySelectorAll("[data-key]").forEach((i) => (i.value = ""));
   document.querySelectorAll("#socials input").forEach((i) => (i.value = ""));
   const gEl = document.getElementById("f_greeting"); if (gEl) gEl.value = state.greeting;
@@ -1039,7 +1002,7 @@ function wireEvents() {
   on("finishAnotherBtn", "click", createAnother);
   // hero: greeting text + animate toggle
   const g = document.getElementById("f_greeting");
-  if (g) { g.value = state.greeting == null ? "Hello! I'm" : state.greeting; g.addEventListener("input", () => { state.greeting = g.value; persist(); render(); }); }
+  if (g) { g.value = state.greeting == null ? "Hello! I'm" : state.greeting; g.addEventListener("input", () => { state.greeting = g.value; persist(state); render(); }); }
   buildHeadlineColors();
 }
 
@@ -1057,7 +1020,7 @@ function buildHeadlineColors() {
     b.style.color = c;
     b.title = c;
     b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-    b.addEventListener("click", () => { state.headlineColor = c; buildHeadlineColors(); persist(); render(); });
+    b.addEventListener("click", () => { state.headlineColor = c; buildHeadlineColors(); persist(state); render(); });
     wrap.appendChild(b);
   });
 }
