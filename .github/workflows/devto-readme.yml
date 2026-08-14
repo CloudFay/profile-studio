@@ -45,7 +45,7 @@ jobs:
           fi
           
           # Install required tools
-          npm install xml2js --save-dev --silent
+          npm install xml2js --silent --no-save
           
           # Run the update script
           node << 'EOF'
@@ -175,9 +175,12 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          
+
           if git diff --quiet README.md 2>/dev/null; then
-            echo "No changes to commit"
-          else
-            git add README.md
-            git commit -m "chore: update DEV.to articles
+            echo "No README changes detected"
+            exit 0
+          fi
+
+          git add README.md
+          git commit -m "chore: update DEV.to articles"
+          git push
