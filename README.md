@@ -109,7 +109,7 @@ When I started building applications, I used to have a fairly simple definition 
 <br><br>
 <code>#softwareengineering</code> <code>#devex</code> <code>#javascript</code>
 <br><br>
-<sub>Faith Omobude · 14/08/2026</sub>
+<sub>Faith Omobude · 8/14/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b"><strong>Read more ↗</strong></a>
 </td>
@@ -125,7 +125,7 @@ Just as we&#39;ve seen in the DevOps world, most organizations adopt AI tools, b
 <br><br>
 <code>#devops</code> <code>#ai</code> <code>#sre</code>
 <br><br>
-<sub>Faith Omobude · 10/03/2026</sub>
+<sub>Faith Omobude · 3/10/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n"><strong>Read more ↗</strong></a>
 </td>
@@ -141,7 +141,7 @@ Just as we&#39;ve seen in the DevOps world, most organizations adopt AI tools, b
 <br><br>
 <code>#devchallenge</code> <code>#githubchallenge</code> <code>#cli</code>
 <br><br>
-<sub>Faith Omobude · 15/02/2026</sub>
+<sub>Faith Omobude · 2/15/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7"><strong>Read more ↗</strong></a>
 </td>
@@ -157,7 +157,7 @@ Hey Dev.to Community 👋 My name is Faith Omobude, an aspiring Cloud/DevOps Eng
 <br><br>
 <code>#cloud</code> <code>#devops</code> <code>#beginners</code>
 <br><br>
-<sub>Faith Omobude · 20/01/2026</sub>
+<sub>Faith Omobude · 1/20/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/hey-devto-1dna"><strong>Read more ↗</strong></a>
 </td>
