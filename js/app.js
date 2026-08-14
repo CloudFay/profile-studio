@@ -37,6 +37,11 @@ const {
   persist,
 } = window.ProfileStudioState;
 
+const {
+  generate: generateREADME,
+  statTheme,
+} = window.ProfileStudioGenerator;
+
 let state = load();
 let step = 0;
 let previewMode = "preview";
@@ -393,20 +398,6 @@ async function refreshDevToCache() {
   persist(state); render();
 }
 
-// ─── markdown generation ───
-function statTheme() {
-  return document.documentElement.getAttribute("data-theme") === "dark" ? "tokyonight" : "default";
-}
-
-function generate(readmeMode = false) {
-  const s = state;
-  const user = (s.username || "").trim();
-  const uEnc = encodeURIComponent(user); // safe for API query strings
-  const ac = (s.accent || "#2ea043").replace("#", "");
-  const a = s.addons;
-  const th = statTheme();
-  const L = [];
-
   // ───────── HERO: static colored header + moving colored headlines ─────────
   const typeLines = [];
   if (s.tagline.trim()) typeLines.push(s.tagline.trim());
@@ -534,6 +525,7 @@ if (
   s.devtoCache &&
   s.devtoCache.articles.length
 ) {
+  L.push("<!-- DEVTO:START -->");
   L.push("### 📝 Latest DEV.to Articles");
   L.push("");
 
@@ -607,7 +599,9 @@ if (
       if (coverImage) {
         L.push(`<a href="${escapeHtml(url)}">`);
         L.push(
-          `<img src="${escapeHtml(coverImage)}" width="100%" alt="${title}" />`
+          `<img src="${escapeHtml(
+            coverImage
+          )}" width="100%" alt="${title}" />`
         );
         L.push("</a>");
         L.push("<br>");
@@ -617,7 +611,9 @@ if (
 
       // Title
       L.push(
-        `<strong><a href="${url}">${title}</a></strong>`
+        `<strong><a href="${escapeHtml(
+          url
+        )}">${title}</a></strong>`
       );
 
       L.push("<br><br>");
@@ -661,7 +657,9 @@ if (
 
       // Read more
       L.push(
-        `<a href="${url}"><strong>Read more ↗</strong></a>`
+        `<a href="${escapeHtml(
+          url
+        )}"><strong>Read more ↗</strong></a>`
       );
 
       L.push("</td>");
@@ -682,6 +680,153 @@ if (
 
     L.push("");
   }
+
+  // ─────────────────────────────────────────────
+  // PROFILE STUDIO PREVIEW VERSION
+  // Keeps the existing beautiful card UI.
+  // ─────────────────────────────────────────────
+  else {
+    L.push('<div class="devto-preview">');
+    L.push('  <div class="devto-grid">');
+
+    articles.forEach((article) => {
+      const title = escapeHtml(article.title || "");
+      const url = safeUrl(article.url);
+
+      const date = article.published_at
+        ? new Date(article.published_at).toLocaleDateString()
+        : "";
+
+      const coverImage =
+        article.cover_image ||
+        article.social_image ||
+        "";
+
+      const descRaw = (article.description || "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const desc = escapeHtml(descRaw.substring(0, 160));
+
+      // Normalize tags
+      let tags = [];
+
+      if (Array.isArray(article.tag_list)) {
+        tags = article.tag_list;
+      } else if (
+        typeof article.tag_list === "string" &&
+        article.tag_list.trim()
+      ) {
+        tags = article.tag_list
+          .split(",")
+          .map((t) => t.trim());
+      } else if (article.tags) {
+        tags = Array.isArray(article.tags)
+          ? article.tags
+          : String(article.tags)
+              .split(",")
+              .map((t) => t.trim());
+      }
+
+      const visibleTags = tags.slice(0, 3);
+      const moreTags = Math.max(
+        0,
+        tags.length - visibleTags.length
+      );
+
+      L.push('    <article class="devto-card">');
+
+      if (coverImage) {
+        L.push(
+          `      <a class="devto-cover" href="${escapeHtml(
+            url
+          )}" target="_blank" rel="noopener noreferrer">`
+        );
+
+        L.push(
+          `        <img src="${escapeHtml(
+            coverImage
+          )}" alt="${title}" />`
+        );
+
+        L.push("      </a>");
+      }
+
+      L.push('      <div class="devto-body">');
+
+      L.push(
+        `        <h4 class="devto-title"><a href="${escapeHtml(
+          url
+        )}" target="_blank" rel="noopener noreferrer">${title}</a></h4>`
+      );
+
+      if (desc) {
+        L.push(
+          `        <p class="devto-desc">${desc}${
+            descRaw.length > 160 ? "..." : ""
+          }</p>`
+        );
+      }
+
+      if (visibleTags.length) {
+        const tagHtml = visibleTags
+          .map(
+            (tag) =>
+              `<span class="devto-tag">#${escapeHtml(
+                String(tag).replace(/^#/, "")
+              )}</span>`
+          )
+          .join("");
+
+        L.push(
+          `        <div class="devto-tags">${tagHtml}${
+            moreTags
+              ? `<span class="devto-tag">+${moreTags}</span>`
+              : ""
+          }</div>`
+        );
+      }
+
+      const author =
+        (article.user && article.user.name) ||
+        (article.user && article.user.username) ||
+        "";
+
+      L.push(
+        `        <div class="devto-meta"><span class="meta-author">${escapeHtml(
+          author
+        )}</span> <span class="meta-sep">•</span> <span class="meta-date">${escapeHtml(
+          date
+        )}</span> <a class="devto-read" href="${escapeHtml(
+          url
+        )}" target="_blank" rel="noopener noreferrer">Read more ↗</a></div>`
+      );
+
+      L.push("      </div>");
+      L.push("    </article>");
+    });
+
+    L.push("  </div>");
+
+    L.push(
+      `  <div style="margin-top:16px;text-align:left;"><a class="btn btn-primary" href="https://dev.to/${encodeURIComponent(
+        devtoUser
+      )}" target="_blank" rel="noopener noreferrer">See more →</a></div>`
+    );
+
+    L.push("</div>");
+    L.push("");
+  }
+
+  // ─────────────────────────────────────────────
+  // AUTOMATION MARKER
+  // Must come AFTER the entire DEV.to section.
+  // The GitHub Action replaces everything between
+  // DEVTO:START and DEVTO:END.
+  // ─────────────────────────────────────────────
+  L.push("<!-- DEVTO:END -->");
+  L.push("");
+}
 
   // ─────────────────────────────────────────────
   // PROFILE STUDIO PREVIEW VERSION
@@ -819,13 +964,32 @@ if (
     L.push("</div>");
     L.push("");
   }
-}
+
 
   // ───────── FOOTER ─────────
   L.push("---");
   L.push(`<p align="center"><i>⭐️ From <a href="${ghProfileUrl(user)}">${escapeMdText(user || "your-username")}</a></i></p>`);
 
   return L.join("\n").replace(/\n{3,}/g, "\n\n").trim() + "\n";
+}
+
+// ─── markdown generation adapter ───
+function generate(readmeMode = false) {
+  return generateREADME(state, {
+    readmeMode,
+    documentRef: document,
+    aboutFields: ABOUT_FIELDS,
+    tech: TECH,
+    socials: SOCIALS,
+    badgeUrl,
+    shEscape,
+    normalizeHost,
+    ghProfileUrl,
+    escapeHtml,
+    escapeMdText,
+    safeUrl,
+    normalizeDevToUsername,
+  });
 }
 
 // ─── render preview ───

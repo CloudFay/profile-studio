@@ -1,34 +1,59 @@
 #!/bin/bash
 # setup-devto-action.sh
 #
-# This script helps set up the DEV.to GitHub Action in your profile repository.
-# Run this in your personal profile repository (username/username on GitHub).
+# Enable automatic DEV.to → GitHub README synchronization.
 #
-# Usage: ./setup-devto-action.sh YOUR_DEVTO_USERNAME
+# Usage:
+#   ./setup-devto-action.sh YOUR_DEVTO_USERNAME
 #
-# Example: ./setup-devto-action.sh anurag
+# Example:
+#   ./setup-devto-action.sh CloudFay
+
+set -e
 
 if [ -z "$1" ]; then
   echo "Usage: $0 YOUR_DEVTO_USERNAME"
   echo ""
-  echo "Example: $0 anurag"
+  echo "Example: $0 CloudFay"
   exit 1
 fi
 
 DEVTO_USERNAME="$1"
+POST_COUNT="${2:-5}"
 
-echo "🔧 Setting up DEV.to GitHub Action..."
+echo ""
+echo "🔧 Profile Studio — DEV.to Auto-Refresh Setup"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Check if .github/workflows directory exists
-if [ ! -d ".github/workflows" ]; then
-  echo "📁 Creating .github/workflows directory..."
-  mkdir -p .github/workflows
+# ─────────────────────────────────────────────
+# Validate repository
+# ─────────────────────────────────────────────
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "❌ This directory is not a Git repository."
+  echo "   Run this script from your GitHub profile repository."
+  exit 1
 fi
 
-# Check if README.md exists and has markers
+echo "✓ Git repository detected"
+
+# ─────────────────────────────────────────────
+# Create directories
+# ─────────────────────────────────────────────
+
+mkdir -p .github/workflows
+mkdir -p .github/scripts
+
+echo "✓ GitHub Actions directories ready"
+
+# ─────────────────────────────────────────────
+# README
+# ─────────────────────────────────────────────
+
 if [ ! -f "README.md" ]; then
-  echo "⚠️  README.md not found. Creating one..."
+  echo "⚠️ README.md not found. Creating one..."
+
   cat > README.md << 'EOF'
 # Hi, I'm [Your Name] 👋
 
@@ -41,57 +66,118 @@ Welcome to my GitHub profile!
 
 ---
 
-<p align="center"><i>⭐️ From <a href="https://github.com/[your-username]">your-username</a></i></p>
+<p align="center">
+  <i>⭐️ From <a href="https://github.com/[your-username]">your-username</a></i>
+</p>
 EOF
-  echo "✅ Created README.md with DEV.to markers"
+
+  echo "✓ README.md created"
 else
-  if ! grep -q "<!-- DEVTO:START -->" README.md; then
-    echo "⚠️  README.md missing DEV.to markers. Adding them..."
-    # Add markers before the footer if it exists, or at the end
-    if grep -q "^---" README.md; then
-      sed -i '/^---/i\### 📝 Latest DEV.to Articles\n\n<!-- DEVTO:START -->\n<!-- DEVTO:END -->\n' README.md
-    else
-      echo ""                           >> README.md
-      echo "### 📝 Latest DEV.to Articles" >> README.md
-      echo ""                           >> README.md
-      echo "<!-- DEVTO:START -->"      >> README.md
-      echo "<!-- DEVTO:END -->"        >> README.md
-    fi
-    echo "✅ Added DEV.to markers to README.md"
-  else
-    echo "✅ README.md already has DEV.to markers"
-  fi
+  echo "✓ README.md detected"
 fi
 
-# Store DEV.to username in git config
-echo ""
-echo "💾 Storing DEV.to username in git config..."
-git config --local devto.username "$DEVTO_USERNAME"
-echo "✅ Stored username: $DEVTO_USERNAME"
+# ─────────────────────────────────────────────
+# README markers
+# ─────────────────────────────────────────────
 
-# Display next steps
+if ! grep -q "<!-- DEVTO:START -->" README.md || \
+   ! grep -q "<!-- DEVTO:END -->" README.md; then
+
+  echo "⚠️ DEV.to markers missing. Adding them..."
+
+  cat >> README.md << 'EOF'
+
+### 📝 Latest DEV.to Articles
+
+<!-- DEVTO:START -->
+<!-- DEVTO:END -->
+EOF
+
+  echo "✓ DEV.to markers added"
+else
+  echo "✓ DEV.to markers detected"
+fi
+
+# ─────────────────────────────────────────────
+# Profile Studio configuration
+# ─────────────────────────────────────────────
+
+cat > .github/profile-studio.yml << EOF
+devto:
+  enabled: true
+  username: "$DEVTO_USERNAME"
+  post_count: $POST_COUNT
+EOF
+
+echo "✓ DEV.to configuration created"
+
+# ─────────────────────────────────────────────
+# GitHub Action
+# ─────────────────────────────────────────────
+
+cat > .github/workflows/devto-readme.yml << 'EOF'
+name: Update DEV.to Articles
+
+on:
+  schedule:
+    # Every day at 9 AM UTC
+    - cron: "0 9 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-devto:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update DEV.to articles
+        run: node .github/scripts/update-devto.js
+
+      - name: Commit README changes
+        run: |
+          git config user.name "Profile Studio"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- README.md; then
+            echo "No README changes detected."
+            exit 0
+          fi
+
+          git add README.md
+          git commit -m "chore: update DEV.to articles"
+          git push
+EOF
+
+echo "✓ GitHub Action installed"
+
+# ─────────────────────────────────────────────
+# Finish
+# ─────────────────────────────────────────────
+
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎉 Setup complete!"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🎉 DEV.to auto-refresh is ready!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Configuration:"
+echo "  DEV.to username : $DEVTO_USERNAME"
+echo "  Posts displayed : $POST_COUNT"
+echo "  Schedule        : Daily at 9 AM UTC"
+echo ""
+echo "Files created:"
+echo "  .github/profile-studio.yml"
+echo "  .github/workflows/devto-readme.yml"
+echo "  .github/scripts/update-devto.js"
 echo ""
 echo "Next steps:"
 echo ""
-echo "1. Copy the GitHub Action workflow to .github/workflows/"
-echo "   (The devto-readme.yml file from Profile Studio)"
-echo ""
-echo "2. Commit your changes:"
-echo "   git add ."
-echo "   git commit -m 'chore: set up DEV.to automatic updates'"
-echo ""
-echo "3. Push to GitHub:"
-echo "   git push"
-echo ""
-echo "4. The action will run:"
-echo "   - Daily at 9 AM UTC (automatic)"
-echo "   - Or manually: Go to Actions tab → Update DEV.to Articles → Run workflow"
-echo ""
-echo "5. (Optional) Change your DEV.to username anytime:"
-echo "   git config --local devto.username NEW_USERNAME"
-echo "   git push"
+echo "  git add ."
+echo "  git commit -m \"chore: enable DEV.to auto-refresh\""
+echo "  git push"
 echo ""
