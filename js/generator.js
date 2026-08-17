@@ -280,88 +280,175 @@
             Math.min(3, s.devtoPostCount || 5)
           );
 
-        if (readmeMode) {
-          L.push("<!-- DEVTO:START -->");
-          L.push("### 📝 Latest DEV.to Articles");
-          L.push("");
+if (readmeMode) {
+  L.push("<!-- DEVTO:START -->");
+  L.push("### 📝 Latest DEV.to Articles");
+  L.push("");
 
-          // ───────── README DEV.TO TABLE ─────────
-          // Keep the preview version as rich HTML cards below,
-          // but generate native Markdown here so copied/downloaded
-          // README content preserves the table structure.
+  // ───────── README DEV.TO HTML TABLE ─────────
+  // Keep the preview version as rich HTML cards below,
+  // while README mode generates a GitHub-compatible
+  // HTML table so the copied/downloaded README keeps
+  // the visual three-column article layout.
 
-          L.push("| Article | Published | Tags |");
-          L.push("|---|---|---|");
+  L.push('<table>');
+  L.push("  <tr>");
 
-          articles.forEach((article) => {
-            const title = escapeMdText(article.title || "");
-            const url = safeUrl(article.url);
+  articles.forEach((article) => {
+    const title = escapeHtml(article.title || "");
+    const url = safeUrl(article.url);
 
-            const date = article.published_at
-              ? new Date(article.published_at).toLocaleDateString()
-              : "";
+    const date = article.published_at
+      ? new Date(article.published_at).toLocaleDateString()
+      : "";
 
-            let tags = [];
+    const coverImage = safeUrl(
+      article.cover_image ||
+      article.social_image ||
+      ""
+    );
 
-            if (Array.isArray(article.tag_list)) {
-              tags = article.tag_list;
-            } else if (
-              typeof article.tag_list === "string" &&
-              article.tag_list.trim()
-            ) {
-              tags = article.tag_list
-                .split(",")
-                .map((t) => t.trim());
-            } else if (article.tags) {
-              tags = Array.isArray(article.tags)
-                ? article.tags
-                : String(article.tags)
-                    .split(",")
-                    .map((t) => t.trim());
-            }
+    const descRaw = (
+      article.description || ""
+    )
+      .replace(/\s+/g, " ")
+      .trim();
 
-            const visibleTags = tags
-              .slice(0, 3)
-              .map((tag) => {
-                const cleanTag = String(tag)
-                  .replace(/^#/, "")
-                  .replace(/\|/g, "\\|")
-                  .trim();
+    const desc = escapeHtml(
+      descRaw.substring(0, 160)
+    );
 
-                return cleanTag ? `\`${cleanTag}\`` : "";
-              })
-              .filter(Boolean);
+    let tags = [];
 
-            const moreTags = Math.max(
-              0,
-              tags.length - visibleTags.length
-            );
+    if (Array.isArray(article.tag_list)) {
+      tags = article.tag_list;
+    } else if (
+      typeof article.tag_list === "string" &&
+      article.tag_list.trim()
+    ) {
+      tags = article.tag_list
+        .split(",")
+        .map((t) => t.trim());
+    } else if (article.tags) {
+      tags = Array.isArray(article.tags)
+        ? article.tags
+        : String(article.tags)
+            .split(",")
+            .map((t) => t.trim());
+    }
 
-            const tagText = visibleTags.join(" ");
+    const visibleTags = tags.slice(0, 3);
 
-            const finalTagText =
-              moreTags > 0
-                ? `${tagText}${tagText ? " " : ""}\`+${moreTags}\``
-                : tagText;
+    const moreTags = Math.max(
+      0,
+      tags.length - visibleTags.length
+    );
 
-            L.push(
-              `| [${title}](${url}) | ${escapeMdText(date)} | ${finalTagText} |`
-            );
-          });
+    const tagHtml = visibleTags
+      .map(
+        (tag) =>
+          `<code>#${escapeHtml(
+            String(tag).replace(/^#/, "")
+          )}</code>`
+      )
+      .join(" ");
 
-          L.push("");
+    const finalTagHtml =
+      moreTags > 0
+        ? `${tagHtml}${
+            tagHtml ? " " : ""
+          }<code>+${moreTags}</code>`
+        : tagHtml;
 
-          const devtoProfile =
-            `https://dev.to/${encodeURIComponent(devtoUser)}`;
+    const author =
+      (article.user &&
+        article.user.name) ||
+      (article.user &&
+        article.user.username) ||
+      "";
 
-          L.push(
-            `[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](${devtoProfile})`
-          );
+    L.push('    <td width="33%" valign="top">');
 
-          L.push("");
-          L.push("<!-- DEVTO:END -->");
-          L.push("");
-        } else {
+    if (coverImage) {
+      L.push(
+        `      <a href="${escapeHtml(url)}">`
+      );
+
+      L.push(
+        `        <img src="${escapeHtml(
+          coverImage
+        )}" width="100%" alt="${title}" />`
+      );
+
+      L.push("      </a>");
+      L.push("      <br>");
+    }
+
+    L.push("      <br>");
+
+    L.push(
+      `      <strong><a href="${escapeHtml(
+        url
+      )}">${title}</a></strong>`
+    );
+
+    L.push("      <br><br>");
+
+    if (desc) {
+      L.push(
+        `      ${desc}${
+          descRaw.length > 160
+            ? "..."
+            : ""
+        }`
+      );
+
+      L.push("      <br><br>");
+    }
+
+    if (finalTagHtml) {
+      L.push(`      ${finalTagHtml}`);
+      L.push("      <br><br>");
+    }
+
+    L.push(
+      `      <sub>${escapeHtml(
+        author
+      )}${
+        date
+          ? ` · ${escapeHtml(date)}`
+          : ""
+      }</sub>`
+    );
+
+    L.push("      <br><br>");
+
+    L.push(
+      `      <a href="${escapeHtml(
+        url
+      )}"><strong>Read more ↗</strong></a>`
+    );
+
+    L.push("    </td>");
+  });
+
+  L.push("  </tr>");
+  L.push("</table>");
+  L.push("");
+
+  const devtoProfile =
+    `https://dev.to/${encodeURIComponent(
+      devtoUser
+    )}`;
+
+  L.push(
+    `[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](${devtoProfile})`
+  );
+
+  L.push("");
+  L.push("<!-- DEVTO:END -->");
+  L.push("");
+} else {
           L.push(
             '<div class="devto-preview">'
           );
