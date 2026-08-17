@@ -28,6 +28,7 @@ const TECH = {
     "CSS3":       { color: "1572B6", logo: "css3" },
     "Sass":       { color: "CC6699", logo: "sass" },
     "SQL":        { color: "4479A1", logo: "mysql" },
+    "PL/SQL":     { color: "F80000", logo: "oracle" },
     "Bash":       { color: "4EAA25", logo: "gnubash" },
     "Solidity":   { color: "363636", logo: "solidity" },
   },
@@ -56,6 +57,7 @@ const TECH = {
     "React Native": { color: "20232A", logo: "react", logoColor: "61DAFB" },
     "Electron":     { color: "47848F", logo: "electron" },
     "Tailwind CSS": { color: "06B6D4", logo: "tailwindcss" },
+    "Oracle APEX":   { color: "F80000", logo: "oracle" },
     "Bootstrap":    { color: "7952B3", logo: "bootstrap" },
     "Vite":         { color: "646CFF", logo: "vite" },
     "jQuery":       { color: "0769AD", logo: "jquery" },
@@ -68,6 +70,7 @@ const TECH = {
   },
   "Databases": {
     "PostgreSQL": { color: "4169E1", logo: "postgresql" },
+    "Oracle":     { color: "F80000", logo: "oracle" },
     "MySQL":      { color: "4479A1", logo: "mysql" },
     "MariaDB":    { color: "003545", logo: "mariadb" },
     "MongoDB":    { color: "47A248", logo: "mongodb" },
@@ -95,6 +98,7 @@ const TECH = {
     "Heroku":         { color: "430098", logo: "heroku" },
     "DigitalOcean":   { color: "0080FF", logo: "digitalocean" },
     "Nginx":          { color: "009639", logo: "nginx" },
+    "Apache":         { color: "D22128", logo: "apache" },
   },
   "Tools": {
     "Git":      { color: "F05032", logo: "git" },
@@ -144,3 +148,4 @@ window.TECH = TECH;
 window.SOCIALS = SOCIALS;
 window.shEscape = shEscape;
 window.badgeUrl = badgeUrl;
+
