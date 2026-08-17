@@ -128,7 +128,10 @@ function generateMarkdown(articles, username) {
   ];
 
   articles.forEach((article) => {
-    const title = escapeHtml(article.title || "");
+    const title = escapeHtml(
+      article.title || ""
+    );
+
     const url = safeUrl(article.url);
 
     if (!url) {
@@ -148,7 +151,7 @@ function generateMarkdown(articles, username) {
       .trim();
 
     const desc = escapeHtml(
-      description.substring(0, 140)
+      description.substring(0, 160)
     );
 
     const date = article.published_at
@@ -157,16 +160,50 @@ function generateMarkdown(articles, username) {
         ).toLocaleDateString()
       : "";
 
-    const tags = Array.isArray(article.tag_list)
-      ? article.tag_list.slice(0, 3)
-      : [];
+    let tags = [];
+
+    if (Array.isArray(article.tag_list)) {
+      tags = article.tag_list;
+    } else if (
+      typeof article.tag_list === "string" &&
+      article.tag_list.trim()
+    ) {
+      tags = article.tag_list
+        .split(",")
+        .map((tag) => tag.trim());
+    }
+
+    const visibleTags = tags.slice(0, 3);
+
+    const moreTags = Math.max(
+      0,
+      tags.length - visibleTags.length
+    );
+
+    const tagHtml = visibleTags
+      .map(
+        (tag) =>
+          `<code>#${escapeHtml(
+            String(tag).replace(/^#/, "")
+          )}</code>`
+      )
+      .join(" ");
+
+    const finalTagHtml =
+      moreTags > 0
+        ? `${tagHtml}${
+            tagHtml ? " " : ""
+          }<code>+${moreTags}</code>`
+        : tagHtml;
 
     const author =
       article.user?.name ||
       article.user?.username ||
       username;
 
-    lines.push('<td width="33%" valign="top">');
+    lines.push(
+      '<td width="33%" valign="top">'
+    );
 
     if (coverImage) {
       lines.push(
@@ -196,25 +233,15 @@ function generateMarkdown(articles, username) {
     if (desc) {
       lines.push(desc);
 
-      if (description.length > 140) {
+      if (description.length > 160) {
         lines.push("...");
       }
 
       lines.push("<br><br>");
     }
 
-    if (tags.length) {
-      lines.push(
-        tags
-          .map(
-            (tag) =>
-              `<code>#${escapeHtml(
-                String(tag).replace(/^#/, "")
-              )}</code>`
-          )
-          .join(" ")
-      );
-
+    if (finalTagHtml) {
+      lines.push(finalTagHtml);
       lines.push("<br><br>");
     }
 
@@ -242,7 +269,9 @@ function generateMarkdown(articles, username) {
   lines.push("");
 
   const profileUrl =
-    `https://dev.to/${encodeURIComponent(username)}`;
+    `https://dev.to/${encodeURIComponent(
+      username
+    )}`;
 
   lines.push(
     `[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](${profileUrl})`
@@ -264,12 +293,23 @@ function updateReadme(content) {
     "utf8"
   );
 
-  const start = readme.indexOf(START_MARKER);
-  const end = readme.indexOf(END_MARKER);
+  const start = readme.indexOf(
+    START_MARKER
+  );
+
+  const end = readme.indexOf(
+    END_MARKER
+  );
 
   if (start === -1 || end === -1) {
     throw new Error(
       "DEV.to README markers were not found"
+    );
+  }
+
+  if (end < start) {
+    throw new Error(
+      "DEV.to README markers are in the wrong order"
     );
   }
 
