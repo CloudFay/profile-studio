@@ -285,32 +285,21 @@
           L.push("### 📝 Latest DEV.to Articles");
           L.push("");
 
+          // ───────── README DEV.TO TABLE ─────────
+          // Keep the preview version as rich HTML cards below,
+          // but generate native Markdown here so copied/downloaded
+          // README content preserves the table structure.
+
+          L.push("| Article | Published | Tags |");
+          L.push("|---|---|---|");
+
           articles.forEach((article) => {
-            const title = escapeHtml(
-              article.title || ""
-            );
+            const title = escapeMdText(article.title || "");
             const url = safeUrl(article.url);
 
             const date = article.published_at
-              ? new Date(
-                  article.published_at
-                ).toLocaleDateString()
+              ? new Date(article.published_at).toLocaleDateString()
               : "";
-
-            const coverImage =
-              article.cover_image ||
-              article.social_image ||
-              "";
-
-            const descRaw = (
-              article.description || ""
-            )
-              .replace(/\s+/g, " ")
-              .trim();
-
-            const desc = escapeHtml(
-              descRaw.substring(0, 140)
-            );
 
             let tags = [];
 
@@ -331,106 +320,39 @@
                     .map((t) => t.trim());
             }
 
-            const visibleTags = tags.slice(0, 3);
+            const visibleTags = tags
+              .slice(0, 3)
+              .map((tag) => {
+                const cleanTag = String(tag)
+                  .replace(/^#/, "")
+                  .replace(/\|/g, "\\|")
+                  .trim();
+
+                return cleanTag ? `\`${cleanTag}\`` : "";
+              })
+              .filter(Boolean);
+
             const moreTags = Math.max(
               0,
               tags.length - visibleTags.length
             );
 
-            const author =
-              (article.user &&
-                article.user.name) ||
-              (article.user &&
-                article.user.username) ||
-              "";
+            const tagText = visibleTags.join(" ");
+
+            const finalTagText =
+              moreTags > 0
+                ? `${tagText}${tagText ? " " : ""}\`+${moreTags}\``
+                : tagText;
 
             L.push(
-              '<td width="33%" valign="top">'
+              `| [${title}](${url}) | ${escapeMdText(date)} | ${finalTagText} |`
             );
-
-            if (coverImage) {
-              L.push(
-                `<a href="${escapeHtml(url)}">`
-              );
-
-              L.push(
-                `<img src="${escapeHtml(
-                  coverImage
-                )}" width="100%" alt="${title}" />`
-              );
-
-              L.push("</a>");
-              L.push("<br>");
-            }
-
-            L.push("<br>");
-
-            L.push(
-              `<strong><a href="${url}">${title}</a></strong>`
-            );
-
-            L.push("<br><br>");
-
-            if (desc) {
-              L.push(
-                `${desc}${
-                  descRaw.length > 140
-                    ? "..."
-                    : ""
-                }`
-              );
-              L.push("<br><br>");
-            }
-
-            if (visibleTags.length) {
-              const tagHtml = visibleTags
-                .map(
-                  (tag) =>
-                    `<code>#${escapeHtml(
-                      String(tag).replace(
-                        /^#/,
-                        ""
-                      )
-                    )}</code>`
-                )
-                .join(" ");
-
-              L.push(tagHtml);
-
-              if (moreTags) {
-                L.push(
-                  ` <code>+${moreTags}</code>`
-                );
-              }
-
-              L.push("<br><br>");
-            }
-
-            L.push(
-              `<sub>${escapeHtml(author)}${
-                date
-                  ? ` · ${escapeHtml(date)}`
-                  : ""
-              }</sub>`
-            );
-
-            L.push("<br><br>");
-
-            L.push(
-              `<a href="${url}"><strong>Read more ↗</strong></a>`
-            );
-
-            L.push("</td>");
           });
 
-          L.push("</tr>");
-          L.push("</table>");
           L.push("");
 
           const devtoProfile =
-            `https://dev.to/${encodeURIComponent(
-              devtoUser
-            )}`;
+            `https://dev.to/${encodeURIComponent(devtoUser)}`;
 
           L.push(
             `[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](${devtoProfile})`
