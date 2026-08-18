@@ -291,87 +291,254 @@ function buildSocials() {
 }
 
 // ─── add-ons ───
+// ─── add-ons ───
 const ADDONS = [
-  { key: "stats", title: "GitHub stats card", desc: "Stars, commits, PRs and issues at a glance." },
-  { key: "langs", title: "Top languages", desc: "Most-used languages across your repositories." },
-  { key: "activity", title: "Contribution activity graph", desc: "A themed line graph of your recent activity." },
-  { key: "quote", title: "Random dev quote", desc: "A developer quote that refreshes on every visit." },
-  { key: "devto", title: "DEV.to articles", desc: "Your latest blog posts from DEV.to — live feed." },
+  {
+    key: "stats",
+    title: "GitHub stats card",
+    desc: "Stars, commits, PRs and issues at a glance.",
+  },
+  {
+    key: "langs",
+    title: "Top languages",
+    desc: "Most-used languages across your repositories.",
+  },
+  {
+    key: "activity",
+    title: "Contribution activity graph",
+    desc: "A themed line graph of your recent activity.",
+  },
+  {
+    key: "quote",
+    title: "Random dev quote",
+    desc: "A developer quote that refreshes on every visit.",
+  },
+  {
+    key: "devto",
+    title: "DEV.to articles",
+    desc: "Your latest blog posts from DEV.to — live feed.",
+  },
 ];
+
 function buildAddons() {
   const wrap = document.getElementById("addons");
+  if (!wrap) return;
+
   wrap.innerHTML = "";
+
   ADDONS.forEach((a) => {
     const row = document.createElement("div");
-    row.className = "toggle-row" + (state.addons[a.key] ? " on" : "");
-    row.innerHTML =
-      `<div class="switch"></div><div class="toggle-text"><div class="toggle-title">${a.title}</div><div class="toggle-desc">${a.desc}</div></div>`;
-    row.onclick = () => {
+
+    row.className =
+      "toggle-row" + (state.addons[a.key] ? " on" : "");
+
+    row.innerHTML = `
+      <div class="switch" aria-hidden="true"></div>
+      <div class="toggle-text">
+        <div class="toggle-title">${a.title}</div>
+        <div class="toggle-desc">${a.desc}</div>
+      </div>
+    `;
+
+    row.setAttribute("role", "button");
+    row.setAttribute("tabindex", "0");
+    row.setAttribute(
+      "aria-pressed",
+      state.addons[a.key] ? "true" : "false"
+    );
+
+    const toggle = () => {
       state.addons[a.key] = !state.addons[a.key];
-      row.classList.toggle("on", state.addons[a.key]);
+
+      row.classList.toggle(
+        "on",
+        state.addons[a.key]
+      );
+
+// Automation depends on DEV.to articles.
+      if (
+        a.key === "devto" &&
+        !state.addons.devto
+      ) {
+        state.addons.devtoAutomation = false;
+      }
+
+      row.setAttribute(
+        "aria-pressed",
+        state.addons[a.key] ? "true" : "false"
+      );
+
       buildDevToConfig();
       persist(state);
-      // If enabling DEV.to, fetch articles
+
+      // DEV.to live feed
       if (a.key === "devto" && state.addons[a.key]) {
         refreshDevToCache();
-      } else {
-        render();
+        return;
       }
+
+      render();
     };
+
+    row.addEventListener("click", toggle);
+
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggle();
+      }
+    });
+
     wrap.appendChild(row);
-    
-    // DEV.to config fields (hidden by default)
-    if (a.key === "devto") {
-      const config = document.createElement("div");
-      config.id = "devtoConfig";
-      config.className = "devto-config" + (state.addons.devto ? " show" : "");
-      config.innerHTML = `
-        <div class="field">
-          <label class="field-label" for="f_devtoUsername">DEV.to username</label>
-          <div class="input-prefixed">
-            <span class="input-prefix">dev.to/</span>
-            <input class="input" id="f_devtoUsername" data-key="devtoUsername" placeholder="yourname" autocomplete="off" />
-          </div>
-          <div class="field-hint">Your DEV.to username or profile URL. Your latest articles will appear in the preview.</div>
-        </div>
-        <div class="field">
-          <label class="field-label" for="f_devtoPostCount">Number of posts to display</label>
-          <input class="input" type="number" id="f_devtoPostCount" data-key="devtoPostCount" min="1" max="20" />
-          <div class="field-hint">Show between 1–20 of your latest DEV.to posts.</div>
-        </div>
-      `;
+
+    // DEV.to configuration fields
+if (a.key === "devto") {
+  const config = document.createElement("div");
+
+  config.id = "devtoConfig";
+  config.className =
+    "devto-config" +
+    (state.addons.devto ? " show" : "");
+
+  config.innerHTML = `
+    <div class="field">
+      <label
+        class="field-label"
+        for="f_devtoUsername"
+      >
+        DEV.to username
+      </label>
+
+      <div class="input-prefixed">
+        <span class="input-prefix">dev.to/</span>
+
+        <input
+          class="input"
+          id="f_devtoUsername"
+          data-key="devtoUsername"
+          placeholder="yourname"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="field-hint">
+        Your DEV.to username or profile URL.
+        Your latest articles will appear in the preview.
+      </div>
+    </div>
+
+    <div class="field">
+      <label
+        class="field-label"
+        for="f_devtoPostCount"
+      >
+        Number of posts to display
+      </label>
+
+      <input
+        class="input"
+        type="number"
+        id="f_devtoPostCount"
+        data-key="devtoPostCount"
+        min="1"
+        max="20"
+      />
+
+      <div class="field-hint">
+        Show between 1–20 of your latest DEV.to posts.
+      </div>
+    </div>
+
+    <div class="devto-automation">
+      <label class="checkbox-row">
+        <input
+          type="checkbox"
+          id="f_devtoAutomation"
+        />
+
+        <span>
+          <strong>Automate the DEV.to articles</strong>
+          <small>
+            Automatically update your profile README
+            when you publish new DEV.to posts.
+          </small>
+        </span>
+      </label>
+    </div>
+  `;
+
       wrap.appendChild(config);
     }
   });
-  buildDevToConfig();
+
 }
 
 function buildDevToConfig() {
   const config = document.getElementById("devtoConfig");
-  if (config) {
-    config.classList.toggle("show", state.addons.devto);
-    if (state.addons.devto) {
-      const inputs = config.querySelectorAll("input[data-key]");
-      inputs.forEach((inp) => {
-        const k = inp.getAttribute("data-key");
-        if (state[k] !== undefined) inp.value = state[k];
-        inp.addEventListener("input", () => {
-          state[k] = inp.type === "number" ? parseInt(inp.value) || 5 : inp.value;
-          persist(state);
-          if (k === "devtoUsername" || k === "devtoPostCount") {
-            refreshDevToCache();
-          } else {
-            render();
-          }
-        });
-      });
-    }
-  }
-}
 
-// strip protocol, path, and stray whitespace from a user-entered host
-function normalizeHost(v) {
-  return String(v || "").trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "").replace(/\s+/g, "");
+  if (!config) return;
+
+  const enabled = !!state.addons.devto;
+
+  config.classList.toggle("show", enabled);
+
+  if (!enabled) {
+    // Automation cannot remain enabled
+    // when DEV.to articles are disabled.
+    state.addons.devtoAutomation = false;
+    persist(state);
+    return;
+  }
+
+  const inputs = config.querySelectorAll(
+    "input[data-key]"
+  );
+
+  inputs.forEach((inp) => {
+    const k = inp.getAttribute("data-key");
+
+    if (state[k] !== undefined) {
+      inp.value = state[k];
+    }
+
+    inp.addEventListener("input", () => {
+      state[k] =
+        inp.type === "number"
+          ? parseInt(inp.value) || 5
+          : inp.value;
+
+      persist(state);
+
+      if (
+        k === "devtoUsername" ||
+        k === "devtoPostCount"
+      ) {
+        refreshDevToCache();
+      } else {
+        render();
+      }
+    });
+  });
+
+  // ─── DEV.to automation checkbox ───
+  const automationCheckbox =
+    document.getElementById("f_devtoAutomation");
+
+  if (automationCheckbox) {
+    automationCheckbox.checked =
+      !!state.addons.devtoAutomation;
+
+    automationCheckbox.addEventListener(
+      "change",
+      () => {
+        state.addons.devtoAutomation =
+          automationCheckbox.checked;
+
+        persist(state);
+        render();
+      }
+    );
+  }
 }
 
 // ─── DEV.to helpers ───

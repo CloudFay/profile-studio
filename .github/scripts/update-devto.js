@@ -40,6 +40,8 @@ function readConfig() {
     ),
 
     enabled: devto.enabled === true,
+
+    automation: devto.automation === true,
   };
 }
 
@@ -344,7 +346,14 @@ async function main() {
 
   if (!config.enabled) {
     console.log(
-      "DEV.to synchronization is disabled."
+      "DEV.to articles are disabled."
+    );
+    return;
+  }
+
+  if (!config.automation) {
+    console.log(
+      "DEV.to automation is disabled."
     );
     return;
   }

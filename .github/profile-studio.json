@@ -1,7 +1,8 @@
 {
   "devto": {
     "post_count": 5,
-    "username": "your-devto-username",
-    "enabled": true
+    "username": "faithomobude",
+    "enabled": true,
+    "automation": true
   }
 }

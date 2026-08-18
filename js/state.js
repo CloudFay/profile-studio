@@ -57,6 +57,7 @@
         activity: true,
         quote: true,
         devto: false,
+        devtoAutomation: false,
       },
 
       devtoUsername: "",
