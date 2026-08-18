@@ -705,6 +705,122 @@ function downloadMd() {
   URL.revokeObjectURL(a.href);
   flash("README.md downloaded");
 }
+
+async function fetchTextFile(url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch ${url}: HTTP ${response.status}`
+    );
+  }
+
+  return response.text();
+}
+
+async function downloadDevToPackage() {
+  if (!window.JSZip) {
+    flash("Package generator is unavailable — reload the page");
+    return;
+  }
+
+  const devtoUsername = normalizeDevToUsername(
+    state.devtoUsername
+  );
+
+  if (!state.addons.devto || !devtoUsername) {
+    flash("Enable DEV.to articles and enter your DEV.to username");
+    return;
+  }
+
+  if (!state.addons.devtoAutomation) {
+    flash("Enable DEV.to automation first");
+    return;
+  }
+
+  try {
+    flash("Preparing automation package…");
+
+    const [
+      updateScript,
+      workflow,
+    ] = await Promise.all([
+      fetchTextFile(
+        "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/scripts/update-devto.js"
+      ),
+      fetchTextFile(
+        "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/workflows/devto-readme.yml"
+      ),
+    ]);
+
+    const zip = new JSZip();
+
+    zip.file(
+      "README.md",
+      generate(true)
+    );
+
+    zip.file(
+      ".github/profile-studio.json",
+      JSON.stringify(
+        {
+          devto: {
+            post_count: Math.min(
+              Math.max(
+                Number(state.devtoPostCount) || 5,
+                1
+              ),
+              20
+            ),
+            username: devtoUsername,
+            enabled: true,
+            automation: true,
+          },
+        },
+        null,
+        2
+      ) + "\n"
+    );
+
+    zip.file(
+      ".github/scripts/update-devto.js",
+      updateScript
+    );
+
+    zip.file(
+      ".github/workflows/devto-readme.yml",
+      workflow
+    );
+
+    const blob = await zip.generateAsync({
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: {
+        level: 6,
+      },
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `${(state.username || "github-profile").trim()}-profile-studio.zip`;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+
+    flash("Automation package downloaded");
+  } catch (error) {
+    console.error("Profile Studio package error:", error);
+    flash("Could not create the automation package");
+  }
+}
+
 function resetAll() {
   if (!confirm("Clear all fields and start over?")) return;
   doReset();
@@ -771,6 +887,7 @@ function wireEvents() {
   on("copyBtn", "click", copyMd);
   on("downloadBtn", "click", downloadMd);
   on("finishDownloadBtn", "click", downloadMd);
+  on("finishPackageBtn", "click", downloadDevToPackage);
   on("finishCopyBtn", "click", copyMd);
   on("finishShareBtn", "click", shareProfile);
   on("finishBackBtn", "click", closeFinish);
