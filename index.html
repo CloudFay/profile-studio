@@ -146,7 +146,7 @@
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
           Download README.md
         </button>
-        <button class="btn" id="finishPackageBtn" type="button">
+        <button class="btn" id="finishPackageBtn" type="button" hidden>
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 7h16"/>
             <path d="M7 3h10l1 4H6l1-4Z"/>
@@ -154,7 +154,7 @@
           </svg>
           Download DEV.to package
         </button>
-        <button class="btn" id="finishCopyBtn" type="button">
+        <button class="btn" id="finishCopyBtn" type="button" hidden>
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Copy markdown
         </button>
@@ -166,11 +166,89 @@
 
       <div class="publish">
         <div class="publish-title">Publish it to your profile</div>
+
         <ol class="publish-steps">
-          <li>Create a new public repo named exactly <code id="finishRepo">your-username</code> (same as your username).</li>
-          <li>Add the <code>README.md</code> file you just downloaded.</li>
-          <li>Visit <code>github.com/<span id="finishUser">your-username</span></code> — it shows on your profile.</li>
+          <li>
+            Create a new <strong>public repository</strong> named exactly the same as
+            your GitHub username: <code id="finishRepo">your-github-username</code>.
+          </li>
+
+          <li>
+            Add the <code>README.md</code> file you just downloaded
+            to the root of the repository.
+          </li>
+
+          <li>
+            Commit the changes, then visit
+            <code>github.com/<span id="finishUser">your-github-username</span></code>.
+            Your README will appear on your GitHub profile.
+          </li>
         </ol>
+
+        <p>
+          <strong>Example:</strong>
+          If your GitHub username is <code>your-github-username</code>, your special
+          repository must also be named <code>your-github-username</code>.
+        </p>
+
+        <div class="publish-automation" id="finishAutomationGuide" hidden>
+          <div class="publish-title">Set up DEV.to automation</div>
+
+          <p>
+            Because you enabled DEV.to automation, your download also includes
+            everything needed to keep your profile README's DEV.to section updated
+            automatically.
+          </p>
+
+          <ol class="publish-steps">
+            <li>
+              Download the <strong>DEV.to package</strong> above and open the ZIP file.
+            </li>
+
+            <li>
+              Copy the contents of the ZIP into the root of your GitHub profile
+              repository. If you already have a <code>.github</code> folder, merge
+              the files into it — do not delete your existing workflows.
+            </li>
+
+            <li>
+              Make sure the repository contains:
+              <pre><code>README.md
+      .github/
+      ├── profile-studio.json
+      ├── scripts/
+      │   └── update-devto.js
+      └── workflows/
+          └── devto-readme.yml</code></pre>
+            </li>
+
+            <li>
+              Commit and push the files to your profile repository.
+            </li>
+
+            <li>
+              Open the repository's <strong>Actions</strong> tab and select
+              <strong>Update DEV.to Articles</strong>.
+            </li>
+
+            <li>
+              Select <strong>Run workflow</strong> to perform the first
+              synchronization.
+            </li>
+
+            <li>
+              After the first successful run, GitHub Actions will periodically
+              check DEV.to and update the DEV.to section of your README automatically.
+            </li>
+          </ol>
+
+          <p>
+            The automation only updates the section between
+            <code>&lt;!-- DEVTO:START --&gt;</code> and
+            <code>&lt;!-- DEVTO:END --&gt;</code>.
+            The rest of your README is left untouched.
+          </p>
+        </div>
       </div>
 
       <div class="finish-foot">

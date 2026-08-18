@@ -492,6 +492,32 @@ if (a.key === "devto") {
 
 }
 
+function updatePackageButtonVisibility() {
+  const button = document.getElementById(
+    "finishPackageBtn"
+  );
+
+  if (button) {
+    button.hidden =
+      !state.addons.devto ||
+      !state.addons.devtoAutomation;
+  }
+
+  updateAutomationGuideVisibility();
+}
+
+function updateAutomationGuideVisibility() {
+  const guide = document.getElementById(
+    "finishAutomationGuide"
+  );
+
+  if (!guide) return;
+
+  guide.hidden =
+    !state.addons.devto ||
+    !state.addons.devtoAutomation;
+}
+
 function buildDevToConfig() {
   const config = document.getElementById("devtoConfig");
 
@@ -506,6 +532,7 @@ function buildDevToConfig() {
     // when DEV.to articles are disabled.
     state.addons.devtoAutomation = false;
     persist(state);
+    updatePackageButtonVisibility();
     return;
   }
 
@@ -554,6 +581,7 @@ function buildDevToConfig() {
           automationCheckbox.checked;
 
         persist(state);
+        updatePackageButtonVisibility();
         render();
       }
     );
@@ -724,15 +752,6 @@ async function downloadDevToPackage() {
     return;
   }
 
-  const devtoUsername = normalizeDevToUsername(
-    state.devtoUsername
-  );
-
-  if (!state.addons.devto || !devtoUsername) {
-    flash("Enable DEV.to articles and enter your DEV.to username");
-    return;
-  }
-
   if (!state.addons.devtoAutomation) {
     flash("Enable DEV.to automation first");
     return;
@@ -896,6 +915,7 @@ function wireEvents() {
   const g = document.getElementById("f_greeting");
   if (g) { g.value = state.greeting == null ? "Hello! I'm" : state.greeting; g.addEventListener("input", () => { state.greeting = g.value; persist(state); render(); }); }
   buildHeadlineColors();
+  updatePackageButtonVisibility();
 }
 
 // swatches to pick the (separate) color for the moving headline lines
@@ -931,5 +951,4 @@ applyThemeIcon();
 setAccent(state.accent || "#2ea043");
 goStep(0);
 render();
-
 
