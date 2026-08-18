@@ -66,6 +66,25 @@ function ghProfileUrl(user) {
   return "https://github.com/" + encodeURIComponent((user || "your-username").trim());
 }
 
+// Normalize the optional GitHub stats host.
+// Accepts a hostname with or without a protocol and removes
+// surrounding whitespace and trailing slashes.
+function normalizeHost(value) {
+  const raw = String(value || "").trim();
+
+  if (!raw) return "";
+
+  try {
+    const url = new URL(
+      raw.includes("://") ? raw : `https://${raw}`
+    );
+
+    return url.hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
 // ─── theme ───
 function applyThemeIcon() {
   const dark = document.documentElement.getAttribute("data-theme") === "dark";
