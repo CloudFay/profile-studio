@@ -45,11 +45,11 @@ function readConfig() {
   };
 }
 
-function fetchArticles(username, postCount) {
+function fetchArticles(username, fetchCount) {
   const url =
     `https://dev.to/api/articles?username=${encodeURIComponent(
       username
-    )}&per_page=${Math.min(postCount, 100)}`;
+    )}&per_page=${Math.min(fetchCount, 100)}`;
 
   return new Promise((resolve, reject) => {
     const request = https.get(
@@ -365,20 +365,45 @@ async function main() {
   }
 
   console.log(
-    `Fetching DEV.to articles for ${config.username}...`
+    `Fetching latest DEV.to articles for ${config.username}...`
   );
 
+  /*
+   * Always fetch the latest 20 articles.
+   *
+   * post_count controls display only.
+   * This means changing post_count from 3 to 5
+   * does not change which articles are considered
+   * latest.
+   */
   const articles = await fetchArticles(
     config.username,
-    config.postCount
+    20
   );
 
   console.log(
     `Found ${articles.length} DEV.to articles.`
   );
 
+  /*
+   * Display only the number configured by the user.
+   *
+   * Example:
+   *   post_count = 3  -> newest 3 articles
+   *   post_count = 5  -> newest 5 articles
+   *   post_count = 10 -> newest 10 articles
+   */
+  const visibleArticles = articles.slice(
+    0,
+    config.postCount
+  );
+
+  console.log(
+    `Displaying ${visibleArticles.length} DEV.to articles.`
+  );
+
   const markdown = generateMarkdown(
-    articles,
+    visibleArticles,
     config.username
   );
 

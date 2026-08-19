@@ -98,6 +98,22 @@ Profile Studio now includes built-in DEV.to support with two complementary featu
 <table>
 <tr>
 <td width="33%" valign="top">
+<a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada">
+<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F4fh791bgqxv6rk9q9ust.png" width="100%" alt="Building a Developer Profile That Keeps Working: Introducing Profile Studio" />
+</a>
+<br>
+<br>
+<strong><a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada">Building a Developer Profile That Keeps Working: Introducing Profile Studio</a></strong>
+<br><br>
+Whilst you build, your GitHub profile tells us a lot about the kind of developer you are. Your...
+<br><br>
+<code>#devops</code> <code>#profilestudio</code> <code>#github</code> <code>+1</code>
+<br><br>
+<sub>Faith Omobude · 19/08/2026</sub>
+<br><br>
+<a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada"><strong>Read more ↗</strong></a>
+</td>
+<td width="33%" valign="top">
 <a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b">
 <img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F1tn5wk2xor3zwl1yz2t5.jpg" width="100%" alt="A Working Application Isn&#39;t Necessarily a Well-Engineered Application" />
 </a>
@@ -109,7 +125,7 @@ When I started building applications, I used to have a fairly simple definition 
 <br><br>
 <code>#softwareengineering</code> <code>#devex</code> <code>#javascript</code> <code>+1</code>
 <br><br>
-<sub>Faith Omobude · 8/14/2026</sub>
+<sub>Faith Omobude · 14/08/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b"><strong>Read more ↗</strong></a>
 </td>
@@ -125,41 +141,9 @@ Just as we&#39;ve seen in the DevOps world, most organizations adopt AI tools, b
 <br><br>
 <code>#devops</code> <code>#ai</code> <code>#sre</code> <code>+1</code>
 <br><br>
-<sub>Faith Omobude · 3/10/2026</sub>
+<sub>Faith Omobude · 10/03/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n"><strong>Read more ↗</strong></a>
-</td>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Ffi4rtoryysdh2ex2a8i9.png" width="100%" alt="GitHub Copilot CLI Challenge: I Built an AI Mentor in My Terminal" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7">GitHub Copilot CLI Challenge: I Built an AI Mentor in My Terminal</a></strong>
-<br><br>
-**This is a submission for the GitHub Copilot CLI Challenge What I Built I didn&#39;t build...
-<br><br>
-<code>#devchallenge</code> <code>#githubchallenge</code> <code>#cli</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 2/15/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7"><strong>Read more ↗</strong></a>
-</td>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/hey-devto-1dna">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F28k6uqz7qb81msmbeqpw.jpeg" width="100%" alt="Hey Dev.to 👋" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/hey-devto-1dna">Hey Dev.to 👋</a></strong>
-<br><br>
-Hey Dev.to Community 👋 My name is Faith Omobude, an aspiring Cloud/DevOps Engineer with a passion...
-<br><br>
-<code>#cloud</code> <code>#devops</code> <code>#beginners</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 1/20/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/hey-devto-1dna"><strong>Read more ↗</strong></a>
 </td>
 </tr>
 </table>
