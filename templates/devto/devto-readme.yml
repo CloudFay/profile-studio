@@ -37,4 +37,8 @@ jobs:
 
           git add README.md
           git commit -m "chore: update DEV.to articles"
-          git push
+
+          git fetch origin main
+          git rebase origin/main
+
+          git push origin main
