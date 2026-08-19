@@ -760,6 +760,15 @@ async function downloadDevToPackage() {
   try {
     flash("Preparing automation package…");
 
+    const devtoUsername = normalizeDevToUsername(
+      state.devtoUsername
+    );
+
+    if (!devtoUsername) {
+      flash("Enter your DEV.to username first");
+      return;
+    }
+
     const [
       updateScript,
       workflow,
@@ -951,4 +960,3 @@ applyThemeIcon();
 setAccent(state.accent || "#2ea043");
 goStep(0);
 render();
-

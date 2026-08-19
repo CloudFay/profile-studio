@@ -277,7 +277,7 @@
         const articles =
           s.devtoCache.articles.slice(
             0,
-            Math.min(3, s.devtoPostCount || 5)
+            s.devtoPostCount || 5
           );
 
 if (readmeMode) {
