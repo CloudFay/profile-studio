@@ -39,12 +39,10 @@ const {
 
 const {
   generate: generateREADME,
-  statTheme,
 } = window.ProfileStudioGenerator;
 
 let state = load();
 let step = 0;
-let previewMode = "preview";
 
 // ─── output-safety helpers ────────────────────────────────────────────────
 // Security primitives live in security.js so they can be independently tested.
@@ -58,7 +56,6 @@ const {
 const {
   normalizeDevToUsername,
   fetchDevToArticles,
-  devToMarkdown,
 } = window.ProfileStudioDevTo;
 
 // Build a safe github.com profile URL from a (possibly empty) username.
@@ -700,7 +697,6 @@ function render() {
 
 // ─── preview tabs ───
 function setPreviewMode(mode) {
-  previewMode = mode;
   document.getElementById("tabPreview").classList.toggle("on", mode === "preview");
   document.getElementById("tabRaw").classList.toggle("on", mode === "raw");
   document.getElementById("previewRendered").hidden = mode !== "preview";

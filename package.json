@@ -2,6 +2,11 @@
   "name": "profile-studio",
   "private": true,
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0"
   }
 }
