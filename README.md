@@ -1,212 +1,765 @@
 # 🎨 Profile Studio
 
-### 🚀 [**Open the live app →**](https://cloudfay.github.io/profile-studio/)
+### Build a polished GitHub Profile README without writing it from scratch.
 
-Fill in a short, friendly wizard and walk away with clean, ready-to-paste
-Markdown — an animated header, tech badges, social links, live GitHub stats,
-a contribution graph, and a dev quote.
+[![Live App](https://img.shields.io/badge/Live%20App-Open%20Profile%20Studio-c900a8?style=for-the-badge)](https://cloudfay.github.io/profile-studio/)
+[![GitHub](https://img.shields.io/badge/GitHub-CloudFay-181717?style=for-the-badge&logo=github)](https://github.com/CloudFay/profile-studio)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
+
+**Profile Studio** is a browser-based GitHub README builder that helps developers create polished GitHub profile READMEs through a guided wizard and live preview.
+
+Choose your identity, bio, technologies, social links, GitHub widgets, theme, and optional integrations — then copy or download the generated Markdown.
+
+No account.  
+No backend.  
+No database.  
+No build step.
+
+Just open Profile Studio and build your profile.
 
 ---
 
-## ✨ What you get
+## 🚀 Open Profile Studio
 
-- **Animated header** — a customizable greeting + typing headlines
-- **About section** — bio plus optional lines (currently learning, fun fact, pronouns…), drag to reorder
-- **Tech stack** — 100+ technology badges across languages, frameworks, tools & more
-- **Social links** — GitHub, LinkedIn, X, Instagram, TikTok, Pinterest, YouTube, email, and more
-- **Live widgets** — GitHub stats, top languages, contribution graph, streak, and a random dev quote
-- **DEV.to integration** ✨ — automatic live feed of your latest blog posts with cover images (see [guide](./DEVTO_INTEGRATION.md))
-- **14 accent colors** + light/dark themes + a custom color picker
-- **Live preview** — see the rendered README and raw Markdown update as you type
+**[→ Launch the live app](https://cloudfay.github.io/profile-studio/)**
 
-## 📋 How to use
+---
 
-1. Open the [live app](https://cloudfay.github.io/profile-studio/).
-2. Enter your GitHub username and fill in the steps.
-3. Click **Download** (or **Copy**) to get your `README.md`.
-4. Create a **public repo named exactly your username**, add the file it shows on your profile.
+## ✨ What is Profile Studio?
 
-That's it. Nothing is uploaded, tracked, or stored on a server your work lives in your own browser.
+Your GitHub profile is often one of the first places people look when they want to understand what you build.
 
-## 🗂️ Project structure
+But creating a good `README.md` can mean dealing with:
 
+- Markdown formatting
+- HTML tables
+- SVG badges
+- GitHub statistics
+- social links
+- contribution graphs
+- dynamic widgets
+- responsive layouts
+- external image URLs
+- repeated README updates
+
+Profile Studio turns that process into a guided interface.
+
+Instead of manually assembling everything, you fill out a short wizard and watch your profile README come together in real time.
+
+### The goal
+
+> **Spend less time fighting README Markdown and more time building things.**
+
+---
+
+# ✨ Features
+
+## 🧙 Guided README Builder
+
+Profile Studio walks you through the process step by step.
+
+Configure:
+
+- GitHub username
+- Profile greeting
+- Headlines
+- About section
+- Optional profile information
+- Technology stack
+- Social links
+- GitHub widgets
+- DEV.to articles
+- Theme and accent color
+
+---
+
+## 👋 Custom Profile Header
+
+Create a profile header with:
+
+- Custom greeting
+- Multiple headlines
+- Animated typing text
+- Optional header content
+
+The generated Markdown is ready to paste directly into your GitHub profile repository.
+
+---
+
+## 📝 About Section
+
+Build an About section with configurable profile information.
+
+You can include:
+
+- Bio
+- Currently learning
+- Fun facts
+- Pronouns
+- Additional profile information
+
+The fields can also be reordered to control how they appear in the generated README.
+
+---
+
+## 🛠️ Technology Stack
+
+Choose from a large catalog of technologies and tools.
+
+Profile Studio supports badges for:
+
+- Programming languages
+- Frameworks
+- Databases
+- Cloud platforms
+- DevOps tools
+- Developer tools
+- Operating systems
+- Other technologies
+
+Selected technologies are automatically converted into README-ready badges.
+
+---
+
+## 🔗 Social Links
+
+Add your online presence without manually writing Markdown.
+
+Supported platforms include:
+
+- GitHub
+- LinkedIn
+- X
+- Instagram
+- TikTok
+- Pinterest
+- YouTube
+- Email
+- And more
+
+---
+
+## 📊 GitHub Widgets
+
+Add dynamic GitHub profile widgets such as:
+
+- GitHub statistics
+- Top languages
+- Contribution graph
+- Contribution streak
+- Developer quote
+
+These widgets are generated using external services and load dynamically when your profile README is rendered.
+
+---
+
+## 🎨 Themes & Accent Colors
+
+Customize the appearance of your generated profile.
+
+Profile Studio includes:
+
+- Dark mode
+- Light mode
+- Multiple predefined accent colors
+- Custom accent color picker
+
+You can change the visual style without touching the generated Markdown.
+
+---
+
+## 👀 Live Preview
+
+The preview updates as you configure your profile.
+
+You can see what your README will look like before copying or downloading it.
+
+Profile Studio provides both:
+
+- Rendered preview
+- Generated Markdown
+
+This makes it easier to catch mistakes before publishing your profile.
+
+---
+
+# 📝 DEV.to Integration
+
+Profile Studio includes built-in DEV.to support.
+
+There are two separate parts:
+
+### 1. Browser Preview
+
+The Profile Studio interface can fetch your DEV.to articles and display them directly in the preview.
+
+You can:
+
+- Enable or disable DEV.to articles
+- Enter your DEV.to username
+- Use a DEV.to profile URL
+- Configure the number of articles
+- Display article covers
+- Preview article metadata
+- See the generated Markdown
+
+The browser integration uses the DEV.to API.
+
+---
+
+### 2. GitHub Actions Automation
+
+Profile Studio can also automatically keep your GitHub profile README synchronized with your DEV.to articles.
+
+The GitHub Action can:
+
+- Fetch your latest DEV.to articles
+- Update a specific section of your README
+- Include article covers when available
+- Run on a schedule
+- Be triggered manually
+- Avoid unnecessary commits when nothing changed
+
+The generated section is protected by markers:
+
+```markdown
+<!-- DEVTO:START -->
+
+<!-- DEVTO:END -->
 ```
-index.html        Markup
-css/styles.css    All styling
-js/catalog.js     Tech + social data and badge helpers
-js/app.js         Wizard logic, Markdown generation, live preview
+
+Only the content between these markers is updated by the automation.
+
+### Configuration
+
+The project includes a Profile Studio configuration file:
+
+```text
+.github/profile-studio.json
 ```
 
-No build step, no framework — open `index.html` locally, or host the folder on any static host.
+Example:
 
-## 🛠️ Run locally
+```json
+{
+  "devto": {
+    "post_count": 3,
+    "username": "your-devto-username",
+    "enabled": true,
+    "automation": true
+  }
+}
+```
 
-Just open `index.html`. For a local server (optional):
+For complete DEV.to setup instructions, troubleshooting, and architecture details, see:
+
+[**→ DEV.to Integration Guide**](./DEVTO_INTEGRATION.md)
+
+---
+
+# 🔒 Security
+
+Profile Studio runs primarily in the browser and does not require a backend server to generate your README.
+
+The project also includes URL validation and output escaping to reduce the risk of unsafe content being introduced through generated Markdown.
+
+For example, unsafe article URLs such as:
+
+```text
+javascript:alert(1)
+```
+
+are not rendered as executable links.
+
+The project includes automated tests covering DEV.to URL handling and generated Markdown.
+
+---
+
+# 🧪 Testing
+
+Profile Studio uses Node's built-in test runner for automated tests.
+
+Run the test suite with:
+
+```bash
+npm test
+```
+
+You can also check individual JavaScript files for syntax errors with Node:
+
+```bash
+node --check js/app.js
+```
+
+And run the project's formatting/diff checks with:
+
+```bash
+git diff --check
+```
+
+The test suite currently includes coverage for functionality such as:
+
+- DEV.to username normalization
+- DEV.to profile URL normalization
+- DEV.to Markdown generation
+- Unsafe article URL handling
+- Unsafe cover image handling
+
+---
+
+# 🏗️ Project Structure
+
+Profile Studio is intentionally built as a small, modular static application.
+
+The project started with more responsibilities living together in the application code. As the project grew, those responsibilities became increasingly difficult to reason about and maintain.
+
+The architecture has therefore evolved toward separating responsibilities between UI logic, README generation, DEV.to integration, security, and application data.
+
+At a high level:
+
+
+```text
+
+                    ┌──────────────────────────┐
+                    │       User / Browser     │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │       Profile Studio     │
+                    │          UI              │
+                    │      index.html          │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │          app.js           │
+                    │   Wizard + UI State Flow  │
+                    └────────────┬─────────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+       ┌────────────┐     ┌────────────┐     ┌────────────┐
+       │  catalog   │     │  devto.js  │     │ generator  │
+       │    .js     │     │            │     │    .js     │
+       │            │     │ DEV.to API │     │ Markdown   │
+       │ Tech/social│     │ integration│     │ generation │
+       │ metadata   │     └─────┬──────┘     └─────┬──────┘
+       └────────────┘           │                  │
+                                ▼                  ▼
+                         ┌────────────┐      ┌─────────────┐
+                         │ DEV.to API │      │ README.md   │
+                         └────────────┘      └─────────────┘
+
+                         ┌────────────┐
+                         │ security.js│
+                         │            │
+                         │ URL + HTML │
+                         │ sanitizing │
+                         └────────────┘
+```
+
+## Repo Structure
+
+```text
+profile-studio/
+│
+├── .github/
+│   ├── workflows/
+│   │   └── ...
+│   └── profile-studio.json
+│
+├── css/
+│   └── styles.css
+│
+├── js/
+│   ├── app.js
+│   ├── catalog.js
+│   ├── devto.js
+│   ├── generator.js
+│   └── security.js
+│
+├── tests/
+│   └── devto.test.js
+│
+├── index.html
+├── eslint.config.js
+├── package.json
+├── DEVTO_INTEGRATION.md
+├── CONTRIBUTORS.md
+└── README.md
+```
+
+### Main Components
+
+| File / Directory | Purpose |
+|---|---|
+| `index.html` | Application interface and wizard markup |
+| `css/styles.css` | Application styling and responsive layout |
+| `js/app.js` | Application state, wizard behavior, and UI interactions |
+| `js/catalog.js` | Technology, social platform, and badge catalog |
+| `js/devto.js` | DEV.to username handling, article fetching, and Markdown generation |
+| `js/generator.js` | README content generation |
+| `js/security.js` | URL validation and output-safety helpers |
+| `tests/` | Automated tests |
+| `.github/workflows/` | GitHub Actions automation |
+| `.github/profile-studio.json` | Profile Studio configuration |
+| `DEVTO_INTEGRATION.md` | Detailed DEV.to integration documentation |
+| `CONTRIBUTORS.md` | Contributors and acknowledgements |
+
+---
+
+# 🧰 Tech Stack
+
+Profile Studio intentionally keeps the technology stack simple.
+
+### Frontend
+
+- HTML5
+- CSS3
+- Vanilla JavaScript
+
+### Libraries
+
+- [Marked](https://marked.js.org/) — Markdown rendering
+- [Globals](https://www.npmjs.com/package/globals) — ESLint environment globals
+
+### Development
+
+- Node.js
+- Node Test Runner
+- ESLint
+- GitHub Actions
+
+There is no frontend framework and no application build pipeline.
+
+---
+
+# 💻 Run Locally
+
+You don't need to install a large development environment to run Profile Studio.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/CloudFay/profile-studio.git
+cd profile-studio
+```
+
+Then open:
+
+```text
+index.html
+```
+
+in your browser.
+
+---
+
+## 🌐 Optional Local Server
+
+If you prefer running Profile Studio through a local HTTP server:
+
+### Using Node.js
 
 ```bash
 npx serve .
-# or
+```
+
+### Using Python
+
+```bash
 python3 -m http.server
 ```
 
-## 🌐 Deploy (GitHub Pages)
-
-1. Push this folder to a **public** repo.
-2. **Settings → Pages → Deploy from a branch → main → / (root)**.
-3. Live at `https://<username>.github.io/<repo>/`.
-
-## ℹ️ About the live widgets
-
-The stats, language, graph, streak, and quote cards are rendered by external
-services (github-readme-stats, shields.io, readme-typing-svg, and others). They
-load live wherever the README is shown and populate once a real GitHub username
-is entered. If a widget's service is temporarily busy, the builder shows a small
-"Renders on your live profile" placeholder — the card still appears on your
-actual profile once its service recovers.
-
-## 📝 DEV.to Integration
-
-Profile Studio now includes built-in DEV.to support with two complementary features:
-
-### 🎯 Browser Preview (Live)
-- **Enable** the "DEV.to articles" addon in the wizard
-- **Enter** your DEV.to username (or profile URL like `dev.to/yourname`)
-- **See** your latest articles with **cover images** in the live preview
-- **Configure** how many articles to display (1–20, default: 5)
-- **Copy** the generated markdown to your README
-
-**How It Works:**
-- Uses DEV.to API for real-time article metadata
-- Displays article title, cover image, URL, and publication date
-- Responsive design works on mobile, tablet, and desktop
-- Cached results prevent excessive API requests
-- Handles errors gracefully (invalid username, network issues, no articles)
-
-### 🤖 GitHub Action (Automated)
-- **Automatic daily updates** — Runs every day at 9 AM UTC (configurable)
-- **Manual trigger** — Run anytime from GitHub Actions tab
-- **Cover images included** — Beautiful article cards with visuals
-- **Safe updates** — Only modifies section between markers
-- **Smart commits** — Skips commit if nothing changed
-
-**Quick Setup:**
-```bash
-1. Add markers to your README:
-   <!-- DEVTO:START -->
-### 📝 Latest DEV.to Articles
-
-<table>
-<tr>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F4fh791bgqxv6rk9q9ust.png" width="100%" alt="Building a Developer Profile That Keeps Working: Introducing Profile Studio" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada">Building a Developer Profile That Keeps Working: Introducing Profile Studio</a></strong>
-<br><br>
-Whilst you build, your GitHub profile tells us a lot about the kind of developer you are. Your...
-<br><br>
-<code>#devops</code> <code>#profilestudio</code> <code>#github</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 8/19/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada"><strong>Read more ↗</strong></a>
-</td>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F1tn5wk2xor3zwl1yz2t5.jpg" width="100%" alt="A Working Application Isn&#39;t Necessarily a Well-Engineered Application" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b">A Working Application Isn&#39;t Necessarily a Well-Engineered Application</a></strong>
-<br><br>
-When I started building applications, I used to have a fairly simple definition of success: 𝐈𝐟 𝐢𝐭...
-<br><br>
-<code>#softwareengineering</code> <code>#devex</code> <code>#javascript</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 8/14/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b"><strong>Read more ↗</strong></a>
-</td>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Ftcb1ho0y2tiuhli0a8ug.png" width="100%" alt="Beyond the Hype: The Realignment of AI Power and the Rise of Model-Agnostic Infrastructure" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n">Beyond the Hype: The Realignment of AI Power and the Rise of Model-Agnostic Infrastructure</a></strong>
-<br><br>
-Just as we&#39;ve seen in the DevOps world, most organizations adopt AI tools, but few truly understand...
-<br><br>
-<code>#devops</code> <code>#ai</code> <code>#sre</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 3/10/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n"><strong>Read more ↗</strong></a>
-</td>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Ffi4rtoryysdh2ex2a8i9.png" width="100%" alt="GitHub Copilot CLI Challenge: I Built an AI Mentor in My Terminal" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7">GitHub Copilot CLI Challenge: I Built an AI Mentor in My Terminal</a></strong>
-<br><br>
-**This is a submission for the GitHub Copilot CLI Challenge What I Built I didn&#39;t build...
-<br><br>
-<code>#devchallenge</code> <code>#githubchallenge</code> <code>#cli</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 2/15/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/github-copilot-cli-challenge-i-built-an-ai-mentor-in-my-terminal-9g7"><strong>Read more ↗</strong></a>
-</td>
-<td width="33%" valign="top">
-<a href="https://dev.to/faithomobude/hey-devto-1dna">
-<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2F28k6uqz7qb81msmbeqpw.jpeg" width="100%" alt="Hey Dev.to 👋" />
-</a>
-<br>
-<br>
-<strong><a href="https://dev.to/faithomobude/hey-devto-1dna">Hey Dev.to 👋</a></strong>
-<br><br>
-Hey Dev.to Community 👋 My name is Faith Omobude, an aspiring Cloud/DevOps Engineer with a passion...
-<br><br>
-<code>#cloud</code> <code>#devops</code> <code>#beginners</code> <code>+1</code>
-<br><br>
-<sub>Faith Omobude · 1/20/2026</sub>
-<br><br>
-<a href="https://dev.to/faithomobude/hey-devto-1dna"><strong>Read more ↗</strong></a>
-</td>
-</tr>
-</table>
-
-[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](https://dev.to/faithomobude)
-
-<!-- DEVTO:END -->
-
-2. Set your DEV.to username:
-   git config --local devto.username YOUR_USERNAME
-   git push
-
-3. Go to Actions tab and run the workflow — that's it!
-```
-
-### 📚 DEV.to Integration Documentation
-- **[DEVTO_INTEGRATION.md](./DEVTO_INTEGRATION.md)** — Complete setup guide & troubleshooting
-- **[CONTRIBUTORS.md](./CONTRIBUTORS.md)** — Credits & team
-
-## 👥 Contributors & Credits
-
-**Original Creator:** [@techwithgen](https://github.com/techwithgen)  
-Profile Studio is a beautiful, intuitive README builder for GitHub profiles.
-
-**DEV.to Integration & Cover Images:** [@CloudFay](https://github.com/CloudFay) (Faith Omobude)  
-Added full DEV.to integration including browser preview, GitHub Actions automation, and cover image support.
-
-**[→ See full contributors & acknowledgements](./CONTRIBUTORS.md)**
+Then open the local address provided by the server.
 
 ---
 
-## 📄 License
+# 🚀 Deploy to GitHub Pages
 
-MIT — free to use, share, and build on.
+Profile Studio is a static application, so it can be deployed to GitHub Pages without a build process.
+
+### 1. Push the project to GitHub
+
+```bash
+git add .
+git commit -m "feat: deploy profile studio"
+git push origin main
+```
+
+### 2. Enable GitHub Pages
+
+Go to:
+
+```text
+Repository
+→ Settings
+→ Pages
+→ Build and deployment
+→ Deploy from a branch
+→ main
+→ / (root)
+```
+
+GitHub will publish the application.
+
+Your site will be available at:
+
+```text
+https://<username>.github.io/<repository>/
+```
+
+---
+
+# 📖 Creating Your GitHub Profile README
+
+Profile Studio generates the Markdown for your GitHub profile.
+
+To use it:
+
+### 1. Open Profile Studio
+
+[**Launch the app**](https://cloudfay.github.io/profile-studio/)
+
+### 2. Enter your GitHub username
+
+Your username powers the GitHub widgets and profile links.
+
+### 3. Complete the wizard
+
+Configure the sections you want to appear on your profile.
+
+### 4. Preview your README
+
+Use the live preview to check the generated result.
+
+### 5. Copy or download the Markdown
+
+Profile Studio gives you ready-to-use Markdown.
+
+### 6. Create your GitHub profile repository
+
+Create a **public repository with exactly the same name as your GitHub username**.
+
+For example:
+
+```text
+github.com/yourusername
+```
+
+Create:
+
+```text
+yourusername/yourusername
+```
+
+### 7. Add the generated README
+
+Place the generated content in:
+
+```text
+README.md
+```
+
+Once committed, GitHub will display the README on your profile.
+
+---
+
+# 🤖 DEV.to GitHub Action
+
+If you want your profile README to update automatically when you publish new DEV.to articles, use the included GitHub Action.
+
+The workflow uses markers so it can update only the DEV.to section of your README without overwriting the rest of your profile.
+
+Example:
+
+```markdown
+<!-- DEVTO:START -->
+
+### 📝 Latest DEV.to Articles
+
+<!-- Automatically generated content -->
+
+<!-- DEVTO:END -->
+```
+
+You can manually trigger the workflow from:
+
+```text
+GitHub
+→ Actions
+→ Update DEV.to Articles
+→ Run workflow
+```
+
+For the complete setup process:
+
+[**→ Read the DEV.to Integration Guide**](./DEVTO_INTEGRATION.md)
+
+---
+
+# 🧑‍💻 Development
+
+Contributions, improvements, and ideas are welcome.
+
+### Fork the Repository
+
+Clone the repository:
+
+```bash
+git clone https://github.com/CloudFay/profile-studio.git
+cd profile-studio
+```
+
+Create a branch:
+
+```bash
+git checkout -b feature/my-feature
+```
+
+Make your changes, then run the tests:
+
+```bash
+npm test
+```
+
+Check for common Git whitespace issues:
+
+```bash
+git diff --check
+```
+
+Commit your changes:
+
+```bash
+git add .
+git commit -m "feat: add my feature"
+```
+
+Push the branch:
+
+```bash
+git push origin feature/my-feature
+```
+
+Then open a Pull Request.
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+Before opening a Pull Request:
+
+1. Keep the project dependency-light.
+2. Avoid introducing unnecessary frameworks.
+3. Keep the application usable as a static site.
+4. Add tests when introducing behavior that can be tested.
+5. Keep security-sensitive URL handling intact.
+6. Update documentation when changing user-facing functionality.
+7. Run the test suite before submitting your PR.
+
+For contributor information and acknowledgements:
+
+[**→ See CONTRIBUTORS.md**](./CONTRIBUTORS.md)
+
+---
+
+# 🗺️ Roadmap
+
+Profile Studio is still evolving.
+
+Potential improvements include:
+
+- More profile section templates
+- More technology badges
+- Additional social platforms
+- More GitHub widgets
+- Additional README layouts
+- Improved customization controls
+- More automated tests
+- Better accessibility coverage
+- More integrations for developer platforms
+- Additional GitHub Actions automation
+
+Have an idea?
+
+Open an issue or start a discussion.
+
+---
+
+# 🌟 Why I Built This
+
+GitHub profiles are part of a developer's public identity.
+
+But creating a polished profile README often requires manually combining Markdown, HTML, badges, external widgets, and image URLs.
+
+Profile Studio started from a simple idea:
+
+> **What if building a good GitHub profile felt more like using a design tool than writing HTML?**
+
+The project is also an experiment in building a small developer-focused tool with:
+
+- Vanilla JavaScript
+- Static hosting
+- GitHub Actions
+- API integrations
+- Markdown generation
+- Security-conscious input handling
+- Automated testing
+- Developer experience in mind
+
+---
+
+# 👥 Contributors & Credits
+
+### Original Creator
+
+[**@techwithgen**](https://github.com/techwithgen)
+
+Profile Studio originated as a GitHub profile README builder created by `@techwithgen`.
+
+### DEV.to Integration & Automation
+
+[**@CloudFay**](https://github.com/CloudFay) — Faith Omobude
+
+Contributed the DEV.to integration, including:
+
+- Browser-based DEV.to article preview
+- DEV.to article metadata handling
+- Cover image support
+- GitHub Actions automation
+- Automated README updates
+- DEV.to configuration
+- Security handling for generated URLs
+- Automated tests
+
+See the complete acknowledgements:
+
+[**→ CONTRIBUTORS.md**](./CONTRIBUTORS.md)
+
+---
+
+# 📄 License
+
+Profile Studio is released under the **MIT License**.
+
+You are free to:
+
+- Use it
+- Modify it
+- Distribute it
+- Build upon it
+
+See the `LICENSE` file for the complete license text.
+
+---
+
+# ⭐ Support the Project
+
+If Profile Studio helped you create your GitHub profile, consider giving the repository a ⭐ on GitHub.
+
+[**⭐ Star Profile Studio on GitHub**](https://github.com/CloudFay/profile-studio)
