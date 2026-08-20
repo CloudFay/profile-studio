@@ -413,3 +413,132 @@ test("does not generate DEV.to section when disabled", () => {
   assert.doesNotMatch(output, /devto-preview/);
   assert.doesNotMatch(output, /DEVTO:START/);
 });
+
+test("uses default headline color when headline color is missing", () => {
+  const state = createState();
+
+  state.headlineColor = "";
+
+  const output = generate(
+    state,
+    createOptions()
+  );
+
+  assert.match(
+    output,
+    /color=a371f7/
+  );
+});
+
+test("generates README DEV.to article without a cover image", () => {
+  const state = createState();
+
+  state.addons.devto = true;
+  state.devtoUsername = "CloudFay";
+
+  state.devtoCache.articles = [
+    {
+      title: "Article Without Cover",
+      url: "https://dev.to/cloudfay/article-without-cover",
+      description: "An article without a cover image.",
+      tag_list: ["testing"],
+      user: {
+        name: "Faith Omobude",
+      },
+    },
+  ];
+
+  const options = createOptions();
+  options.readmeMode = true;
+
+  const output = generate(state, options);
+
+  assert.match(output, /Article Without Cover/);
+  assert.match(output, /<table>/);
+  assert.doesNotMatch(output, /example\.com/);
+});
+
+test("supports DEV.to string tag_list in preview cards", () => {
+  const state = createState();
+
+  state.addons.devto = true;
+  state.devtoUsername = "CloudFay";
+
+  state.devtoCache.articles = [
+    {
+      title: "String Tags",
+      url: "https://dev.to/cloudfay/string-tags",
+      description: "Testing string-based DEV.to tags.",
+      tag_list: "aws, devops, cloud",
+      user: {
+        name: "Faith Omobude",
+      },
+    },
+  ];
+
+  const output = generate(
+    state,
+    createOptions()
+  );
+
+  assert.match(output, /String Tags/);
+  assert.match(output, /#aws/);
+  assert.match(output, /#devops/);
+  assert.match(output, /#cloud/);
+});
+
+test("supports fallback tags array in DEV.to preview cards", () => {
+  const state = createState();
+
+  state.addons.devto = true;
+  state.devtoUsername = "CloudFay";
+
+  state.devtoCache.articles = [
+    {
+      title: "Fallback Tags",
+      url: "https://dev.to/cloudfay/fallback-tags",
+      description: "Testing the fallback tags property.",
+      tags: ["javascript", "testing"],
+      user: {
+        name: "Faith Omobude",
+      },
+    },
+  ];
+
+  const output = generate(
+    state,
+    createOptions()
+  );
+
+  assert.match(output, /Fallback Tags/);
+  assert.match(output, /#javascript/);
+  assert.match(output, /#testing/);
+});
+
+test("supports fallback tags string in DEV.to preview cards", () => {
+  const state = createState();
+
+  state.addons.devto = true;
+  state.devtoUsername = "CloudFay";
+
+  state.devtoCache.articles = [
+    {
+      title: "Fallback String Tags",
+      url: "https://dev.to/cloudfay/fallback-string-tags",
+      description: "Testing string fallback tags.",
+      tags: "docker, containers",
+      user: {
+        name: "CloudFay",
+      },
+    },
+  ];
+
+  const output = generate(
+    state,
+    createOptions()
+  );
+
+  assert.match(output, /Fallback String Tags/);
+  assert.match(output, /#docker/);
+  assert.match(output, /#containers/);
+});
