@@ -215,7 +215,7 @@ This is useful when testing the installation or when you want to update the READ
 
 The automation generates a section similar to:
 
-![Dev.to Section](image.png)
+![Dev.to Section](./images/image.png)
 
 &lt;!-- DEVTO:END --&gt;
 
@@ -295,4 +295,4 @@ The workflow uses the repository's GitHub Actions token to commit and push the g
 
 # **11\. Architecture**
 
-![Project Architecture](image.png)
+![Project Architecture](./images/PA.png)
