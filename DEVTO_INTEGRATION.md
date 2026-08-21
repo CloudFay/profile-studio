@@ -238,39 +238,7 @@ are rejected.
 
 Article titles, descriptions, tags, and author information are HTML-escaped before being inserted into the generated README section.
 
-# **10\. Important Repository Separation**
-
-Profile Studio itself is a separate project.
-
-For example:
-
-CloudFay/profile-studio
-
-contains the Profile Studio application and its project documentation.
-
-Your GitHub profile repository is separate:
-
-CloudFay/CloudFay
-
-The DEV.to automation is intended to run in the **profile repository**, not in the Profile Studio project repository.
-
-Therefore:
-
-CloudFay/profile-studio/README.md
-
-is the Profile Studio project documentation.
-
-It should NOT be modified by the generated DEV.to automation.
-
-Instead:
-
-CloudFay/CloudFay/README.md
-
-is the profile README that receives the automated DEV.to section.
-
-The same architecture works for every Profile Studio user.
-
-# **11\. Troubleshooting**
+# **10\. Troubleshooting**
 
 ## **DEV.to articles do not appear**
 
@@ -320,33 +288,25 @@ contents: write
 
 The workflow uses the repository's GitHub Actions token to commit and push the generated README update.
 
-# **12\. Architecture**
+# **11\. Architecture**
 
-Profile Studio
+flowchart TD
+    A["Profile Studio"] --> B["Configure DEV.to"]
+    B --> C["Generate / Download Package"]
 
-      │
-      ▼
+    C --> D["User's GitHub Profile Repository"]
 
-DEV.to configuration
+    D --> E[".github/profile-studio.json"]
+    D --> F[".github/workflows/devto-readme.yml"]
+    D --> G[".github/scripts/update-devto.js"]
+    D --> H["README.md"]
 
-      │
-      ▼
-Download package
-      │
-      ▼
-User's profile repo
-          │
-┌─────────┴─────────┐
-│                   │
-▼                   ▼
-profile-studio.json README.md
-│                    │
-▼                    │
-GitHub Actions       │
-│                    │
-▼                    │
-DEV.to API           │
-│                    │
-└─────────┬───────── ┘
-          ▼
-    DEV.to README section
+    E --> F
+    F --> G
+    G --> I["DEV.to API"]
+    I --> J["Fetch Published Articles"]
+
+    J --> G
+    G --> H
+
+    H --> K["DEV.to Articles Section"]
