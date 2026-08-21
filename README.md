@@ -226,6 +226,61 @@ The generated section is protected by markers:
 <!-- DEVTO:START -->
 ### 📝 Latest DEV.to Articles
 
+<table>
+<tr>
+<td width="33%" valign="top">
+<a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada">
+<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F4fh791bgqxv6rk9q9ust.png" width="100%" alt="Building a Developer Profile That Keeps Working: Introducing Profile Studio" />
+</a>
+<br>
+<br>
+<strong><a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada">Building a Developer Profile That Keeps Working: Introducing Profile Studio</a></strong>
+<br><br>
+Whilst you build, your GitHub profile tells us a lot about the kind of developer you are. Your...
+<br><br>
+<code>#devops</code> <code>#profilestudio</code> <code>#github</code> <code>+1</code>
+<br><br>
+<sub>Faith Omobude · 8/19/2026</sub>
+<br><br>
+<a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada"><strong>Read more ↗</strong></a>
+</td>
+<td width="33%" valign="top">
+<a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b">
+<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.us-east-2.amazonaws.com%2Fuploads%2Farticles%2F1tn5wk2xor3zwl1yz2t5.jpg" width="100%" alt="A Working Application Isn&#39;t Necessarily a Well-Engineered Application" />
+</a>
+<br>
+<br>
+<strong><a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b">A Working Application Isn&#39;t Necessarily a Well-Engineered Application</a></strong>
+<br><br>
+When I started building applications, I used to have a fairly simple definition of success: 𝐈𝐟 𝐢𝐭...
+<br><br>
+<code>#softwareengineering</code> <code>#devex</code> <code>#javascript</code> <code>+1</code>
+<br><br>
+<sub>Faith Omobude · 8/14/2026</sub>
+<br><br>
+<a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b"><strong>Read more ↗</strong></a>
+</td>
+<td width="33%" valign="top">
+<a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n">
+<img src="https://media2.dev.to/dynamic/image/width=1000,height=420,fit=cover,gravity=auto,format=auto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Ftcb1ho0y2tiuhli0a8ug.png" width="100%" alt="Beyond the Hype: The Realignment of AI Power and the Rise of Model-Agnostic Infrastructure" />
+</a>
+<br>
+<br>
+<strong><a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n">Beyond the Hype: The Realignment of AI Power and the Rise of Model-Agnostic Infrastructure</a></strong>
+<br><br>
+Just as we&#39;ve seen in the DevOps world, most organizations adopt AI tools, but few truly understand...
+<br><br>
+<code>#devops</code> <code>#ai</code> <code>#sre</code> <code>+1</code>
+<br><br>
+<sub>Faith Omobude · 3/10/2026</sub>
+<br><br>
+<a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n"><strong>Read more ↗</strong></a>
+</td>
+</tr>
+</table>
+
+[![See more](https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)](https://dev.to/faithomobude)
+
 <!-- DEVTO:END -->
 ```
 
