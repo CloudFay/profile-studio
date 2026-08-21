@@ -2,7 +2,8 @@ const fs = require("fs");
 const https = require("https");
 
 const CONFIG_PATH = ".github/profile-studio.json";
-const README_PATH = "README.md";
+const README_PATH =
+  process.env.DEVTO_README_PATH || "README.md";
 
 const START_MARKER = "<!-- DEVTO:START -->";
 const END_MARKER = "<!-- DEVTO:END -->";

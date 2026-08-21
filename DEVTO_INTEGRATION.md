@@ -1,173 +1,396 @@
 # DEV.to Integration Guide
 
-Profile Studio includes two complementary DEV.to integrations:
+Profile Studio provides two complementary DEV.to integrations:
 
-## 1. Browser Preview (DEV.to API)
-
-The browser preview uses the **DEV.to API** to display a live feed of your latest articles.
-
-### How to Use
-
-1. Go to the **Add-ons** step in Profile Studio
-2. Toggle on **DEV.to articles**
-3. Enter your **DEV.to username** (or full profile URL like `dev.to/yourname`)
-4. Set the **number of posts** to display (1–20)
-5. Your latest articles will appear in the live preview
-
-The preview refreshes automatically when you change your username or post count. The API data is cached to avoid repeated requests.
-
-### Features
-
-- ✅ Live preview of your DEV.to articles
-- ✅ **Cover images** for each article (when available)
-- ✅ Works in both dark and light mode
-- ✅ Responsive design
-- ✅ Shows article title, cover image, publication date, and URL
-- ✅ Article preview/description snippet
-- ✅ Handles errors gracefully (network issues, invalid username, no articles)
-
-## 2. GitHub Action (DEV.to RSS)
-
-The GitHub Action automatically updates your GitHub profile README with your latest DEV.to articles.
-
-### Setup Instructions
-
-1. **Ensure markers are in your README:**
-
-   Add these markers to your `README.md` where you want DEV.to articles to appear:
-
-   ```markdown
-   <!-- DEVTO:START -->
-   <!-- DEVTO:END -->
-   ```
-
-2. **Store your DEV.to username in git config:**
-
-   Run this once in your profile repository:
-
-   ```bash
-   git config --local devto.username YOUR_DEVTO_USERNAME
-   ```
-
-   Replace `YOUR_DEVTO_USERNAME` with your actual DEV.to username (e.g., `anurag`).
-
-3. **The Action will automatically:**
-
-   - Run daily at 9 AM UTC
-   - Fetch your latest articles from DEV.to RSS
-   - Update the README between the markers
-   - Commit changes only if there are new articles
-   - Push the updated README to your repository
-
-### Manual Trigger
-
-You can also manually trigger the workflow from GitHub Actions:
-
-1. Go to your repository
-2. Click **Actions**
-3. Select **Update DEV.to Articles**
-4. Click **Run workflow**
-5. Optionally enter:
-   - **DEV.to username** (overrides git config)
-   - **Number of posts** (default: 5)
-
-### How the Workflow Works
-
-The Action reads your DEV.to RSS feed at `https://dev.to/feed/USERNAME` and extracts:
-
-- Article title
-- Article URL
-- Publication date
-- **Cover image** (when available in RSS metadata)
-
-It generates a markdown list with images:
-
-```markdown
-<!-- DEVTO:START -->
-### 📝 Latest DEV.to Articles
-
-<a href="https://dev.to/..." target="_blank" rel="noopener noreferrer">
-  <img src="https://..." alt="Article Title" width="100%" style="border-radius:8px;margin-bottom:8px;" />
-</a>
-**[Article Title](https://dev.to/...)** — 8/10/2026
-
-<a href="https://dev.to/..." target="_blank" rel="noopener noreferrer">
-  <img src="https://..." alt="Another Article" width="100%" style="border-radius:8px;margin-bottom:8px;" />
-</a>
-**[Another Article](https://dev.to/...)** — 8/9/2026
-
-<!-- DEVTO:END -->
-```
-
-### Configuration
-
-The Action stores the DEV.to username in your repository's git config. To change it:
-
-```bash
-git config --local devto.username NEW_USERNAME
-git push
-```
-
-Or use the GitHub Actions UI to manually trigger with a different username.
-
-## Architecture: Why Two Approaches?
-
-### Browser Preview Uses API
-
-- Better data: structured article metadata, cover images (future enhancement)
-- Real-time: fetch on demand in the UI
-- User-friendly: no server-side setup required
-
-### GitHub Action Uses RSS
-
-- Server-side automation: runs automatically on schedule
-- No API polling limits to worry about
-- Simpler to parse and update markdown
-- Standard web format (RSS/Atom)
-
-## Troubleshooting
-
-### "No articles found" in preview
-
-- Check that your DEV.to username is correct
-- Ensure you have published at least one article on DEV.to
-- Try refreshing the page
-- Check your browser console for errors
-
-### GitHub Action doesn't update README
-
-- Verify the markers `<!-- DEVTO:START -->` and `<!-- DEVTO:END -->` are in your README
-- Check git config: `git config --local --list | grep devto`
-- Go to Actions tab and check the workflow run logs
-- Make sure the action has write permissions (should be automatic for personal repos)
-
-### "Markers not found in README.md"
-
-- Add the markers to your README:
-  ```markdown
-  <!-- DEVTO:START -->
-  <!-- DEVTO:END -->
-  ```
-- Make sure they're on separate lines
-- Push the changes and re-run the workflow
-
-## Example README Setup
-
-```markdown
-# Hi, I'm Anurag! 👋
-
-I write about web development, open source, and software engineering.
-
-### 📝 Latest DEV.to Articles
-
-<!-- DEVTO:START -->
-<!-- DEVTO:END -->
-
-### My GitHub Stats
-
-...rest of your README...
-```
+1. **Browser Preview** — displays your latest DEV.to articles while building your profile.
+2. **GitHub Actions Automation** — automatically keeps the DEV.to section of your GitHub profile README up to date.
 
 ---
 
-For questions or issues, open an issue in the Profile Studio repository!
+## 1. Browser Preview
+
+The browser preview uses the public DEV.to API to display your latest articles.
+
+### How to use
+
+1. Open the **Add-ons** step in Profile Studio.
+2. Enable **DEV.to articles**.
+3. Enter your DEV.to username.
+4. Set the number of posts to display.
+5. Your latest DEV.to articles will appear in the preview.
+
+The username can be entered as either:
+
+```text
+yourname
+
+or:
+
+<https://dev.to/yourname>
+```
+
+### **Features**
+
+- Live DEV.to article preview
+- Cover images when available
+- Article titles
+- Article descriptions
+- Publication dates
+- Article tags
+- Responsive article cards
+- Dark and light mode support
+- Safe URL handling
+- Graceful handling of API errors
+- Configurable number of posts
+
+## 2. DEV.to GitHub Automation
+
+Profile Studio can generate a GitHub Actions package that automatically updates the DEV.to section of your GitHub profile README.
+
+The generated package contains:
+
+.github/
+
+├── profile-studio.json
+
+├── scripts/
+
+│ └── update-devto.js
+
+└── workflows/
+
+└── devto-readme.yml
+
+## How the automation works
+
+The automation runs inside your **GitHub profile repository**.
+
+For example:
+
+CloudFay/CloudFay
+
+or, for another user:
+
+username/username
+
+The workflow does not contain a hard-coded GitHub username.
+
+Instead, GitHub Actions checks out the repository where the workflow is installed.
+
+Therefore the same generated package can be used by different users.
+
+# **3\. README Markers**
+
+The automation only modifies the section between these two markers:
+
+&lt;!-- DEVTO:START --&gt;
+
+&lt;!-- DEVTO:END --&gt;
+
+Add them to your GitHub profile README where you want the DEV.to section to appear.
+
+For example:
+
+\# Hi, I'm Your Name 👋
+
+I'm a developer building things with cloud technologies.
+
+&lt;!-- DEVTO:START --&gt;
+
+&lt;!-- DEVTO:END --&gt;
+
+\## Projects
+
+...
+
+Everything outside these markers is left untouched.
+
+# **4\. Generated Configuration**
+
+Profile Studio generates:
+
+.github/profile-studio.json
+
+Example:
+
+{
+
+"devto": {
+
+"post_count": 5,
+
+"username": "your-devto-username",
+
+"enabled": true,
+
+"automation": true
+
+}
+
+}
+
+### Configuration fields
+```
+| Field | Description |
+| --- | --- |
+| `username` | Your DEV.to username |
+| `post_count` | Number of articles to display |
+| `enabled` | Enables DEV.to integration |
+| `automation` | Enables GitHub Actions automation |
+
+post_count supports values from:
+
+1–20
+
+# 5. Installing the Automation Package
+
+After enabling DEV.to automation in Profile Studio:
+
+1. Download the **DEV.to package**.
+2. Extract the ZIP file.
+3. Copy the .github directory into your GitHub profile repository.
+4. Make sure the repository contains your profile README.md.
+5. Commit and push the files.
+6. Open the repository's **Actions** tab.
+7. Select **Update DEV.to Articles**.
+8. Run the workflow manually for the first test.
+
+Your repository should look similar to:
+
+your-profile-repository/
+
+├── .github/
+
+│ ├── profile-studio.json
+
+│ ├── scripts/
+
+│ │ └── update-devto.js
+
+│ └── workflows/
+
+│ └── devto-readme.yml
+
+└── README.md
+
+# **6\. What the GitHub Action Does**
+
+The workflow:
+
+1. Checks out the profile repository.
+2. Installs Node.js 20.
+3. Reads .github/profile-studio.json.
+4. Fetches the latest DEV.to articles using the DEV.to API.
+5. Selects the configured number of articles.
+6. Generates the DEV.to README section.
+7. Replaces only the content between the DEV.to markers.
+8. Commits the change if the README changed.
+9. Pushes the update back to the profile repository.
+
+The workflow runs automatically once per day.
+
+It can also be started manually from GitHub Actions.
+
+# **7\. Manual Workflow Trigger**
+
+To manually run the automation:
+
+1. Open your GitHub profile repository.
+2. Select **Actions**.
+3. Select **Update DEV.to Articles**.
+4. Click **Run workflow**.
+
+This is useful when testing the installation or when you want to update the README immediately.
+
+# **8\. Example Generated README Section**
+
+The automation generates a section similar to:
+
+&lt;!-- DEVTO:START --&gt;
+
+\### 📝 Latest DEV.to Articles
+
+&lt;table&gt;
+
+&lt;tr&gt;
+
+&lt;td width="33%" valign="top"&gt;
+
+&lt;a href="<https://dev.to/>..."&gt;
+
+&lt;img src="https://..." width="100%" alt="Article title" /&gt;
+
+&lt;/a&gt;
+
+&lt;br&gt;
+
+&lt;strong&gt;
+
+&lt;a href="<https://dev.to/..."&gt;Article> title&lt;/a&gt;
+
+&lt;/strong&gt;
+
+&lt;br&gt;&lt;br&gt;
+
+Article description...
+
+&lt;br&gt;&lt;br&gt;
+
+&lt;code&gt;#devops&lt;/code&gt; &lt;code&gt;#aws&lt;/code&gt; &lt;code&gt;#cloud&lt;/code&gt;
+
+&lt;br&gt;&lt;br&gt;
+
+&lt;sub&gt;Author · 8/21/2026&lt;/sub&gt;
+
+&lt;br&gt;&lt;br&gt;
+
+&lt;a href="<https://dev.to/>..."&gt;
+
+&lt;strong&gt;Read more ↗&lt;/strong&gt;
+
+&lt;/a&gt;
+
+&lt;/td&gt;
+
+&lt;/tr&gt;
+
+&lt;/table&gt;
+
+\[!\[See more\](<https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)\>](<https://dev.to/yourname>)
+
+&lt;!-- DEVTO:END --&gt;
+
+The exact content depends on the articles returned by DEV.to.
+
+# **9\. Security and Safety**
+
+The integration validates external URLs before placing them into generated HTML.
+
+Article URLs and cover-image URLs are restricted to:
+
+http://
+
+https://
+
+Unsafe schemes such as:
+
+javascript:
+
+data:
+
+are rejected.
+
+Article titles, descriptions, tags, and author information are HTML-escaped before being inserted into the generated README section.
+
+# **10\. Important Repository Separation**
+
+Profile Studio itself is a separate project.
+
+For example:
+
+CloudFay/profile-studio
+
+contains the Profile Studio application and its project documentation.
+
+Your GitHub profile repository is separate:
+
+CloudFay/CloudFay
+
+The DEV.to automation is intended to run in the **profile repository**, not in the Profile Studio project repository.
+
+Therefore:
+
+CloudFay/profile-studio/README.md
+
+is the Profile Studio project documentation.
+
+It should NOT be modified by the generated DEV.to automation.
+
+Instead:
+
+CloudFay/CloudFay/README.md
+
+is the profile README that receives the automated DEV.to section.
+
+The same architecture works for every Profile Studio user.
+
+# **11\. Troubleshooting**
+
+## **DEV.to articles do not appear**
+
+Check:
+
+- DEV.to username is correct.
+- DEV.to integration is enabled.
+- You have published at least one DEV.to article.
+- The browser has network access.
+- Check the browser console for API errors.
+
+## **GitHub Action fails with "README.md not found"**
+
+Make sure the workflow is installed in your GitHub profile repository and that the repository contains:
+
+README.md
+
+## **GitHub Action reports "DEV.to README markers were not found"**
+
+Make sure your profile README contains:
+
+&lt;!-- DEVTO:START --&gt;
+
+&lt;!-- DEVTO:END --&gt;
+
+The markers must appear in that exact order.
+
+## **The wrong part of the README was changed**
+
+The automation only replaces the content between:
+
+&lt;!-- DEVTO:START --&gt;
+
+and:
+
+&lt;!-- DEVTO:END --&gt;
+
+Everything outside those markers remains untouched.
+
+## **GitHub Action cannot push changes**
+
+Check that the workflow contains:
+
+permissions:
+
+contents: write
+
+The workflow uses the repository's GitHub Actions token to commit and push the generated README update.
+
+# **12\. Architecture**
+
+Profile Studio
+
+      │
+      ▼
+
+DEV.to configuration
+
+      │
+      ▼
+Download package
+      │
+      ▼
+User's profile repo
+          │
+┌─────────┴─────────┐
+│                   │
+▼                   ▼
+profile-studio.json README.md
+│                    │
+▼                    │
+GitHub Actions       │
+│                    │
+▼                    │
+DEV.to API           │
+│                    │
+└─────────┬───────── ┘
+          ▼
+    DEV.to README section

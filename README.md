@@ -224,6 +224,7 @@ The generated section is protected by markers:
 
 ```markdown
 <!-- DEVTO:START -->
+### 📝 Latest DEV.to Articles
 
 <!-- DEVTO:END -->
 ```
