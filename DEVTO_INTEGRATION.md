@@ -295,30 +295,4 @@ The workflow uses the repository's GitHub Actions token to commit and push the g
 
 # **11\. Architecture**
 
-Profile Studio
-      │
-      ▼
-DEV.to Configuration
-      │
-      ▼
-Download Package
-      │
-      ▼
-User's Profile Repository
-      │
-      ├── .github/profile-studio.json
-      │          │
-      │          ▼
-      │    GitHub Actions
-      │          │
-      │          ▼
-      │      DEV.to API
-      │          │
-      │          ▼
-      │    Fetch Articles
-      │          │
-      │          ▼
-      └──────► README.md
-                   │
-                   ▼
-          DEV.to Articles Section
+![Project Architecture](image.png)
