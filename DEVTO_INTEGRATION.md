@@ -91,7 +91,8 @@ Add them to your GitHub profile README where you want the DEV.to section to appe
 
 For example:
 
-\# Hi, I'm Your Name 👋
+```
+ Hi, I'm Your Name 👋
 
 I'm a developer building things with cloud technologies.
 
@@ -99,20 +100,21 @@ I'm a developer building things with cloud technologies.
 
 &lt;!-- DEVTO:END --&gt;
 
-\## Projects
+ Projects
+```
 
 ...
 
 Everything outside these markers is left untouched.
 
-# **4\. Generated Configuration**
+# 4. Generated Configuration
 
 Profile Studio generates:
 
 .github/profile-studio.json
 
 Example:
-
+```
 {
 
 "devto": {
@@ -128,6 +130,7 @@ Example:
 }
 
 }
+```
 
 ### Configuration fields
 ```
@@ -137,10 +140,12 @@ Example:
 | `post_count` | Number of articles to display |
 | `enabled` | Enables DEV.to integration |
 | `automation` | Enables GitHub Actions automation |
+```
 
 post_count supports values from:
-
+```
 1–20
+```
 
 # 5. Installing the Automation Package
 
@@ -156,7 +161,7 @@ After enabling DEV.to automation in Profile Studio:
 8. Run the workflow manually for the first test.
 
 Your repository should look similar to:
-
+```
 your-profile-repository/
 
 ├── .github/
@@ -172,8 +177,9 @@ your-profile-repository/
 │ └── devto-readme.yml
 
 └── README.md
+```
 
-# **6\. What the GitHub Action Does**
+# 6. What the GitHub Action Does
 
 The workflow:
 
@@ -191,7 +197,7 @@ The workflow runs automatically once per day.
 
 It can also be started manually from GitHub Actions.
 
-# **7\. Manual Workflow Trigger**
+# 7. Manual Workflow Trigger
 
 To manually run the automation:
 
@@ -202,7 +208,7 @@ To manually run the automation:
 
 This is useful when testing the installation or when you want to update the README immediately.
 
-# **8\. Example Generated README Section**
+# 8. Example Generated README Section
 
 The automation generates a section similar to:
 
