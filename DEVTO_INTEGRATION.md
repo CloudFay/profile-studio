@@ -67,12 +67,15 @@ The automation runs inside your **GitHub profile repository**.
 
 For example:
 
+```
 CloudFay/CloudFay
+```
 
 or, for another user:
 
+```
 username/username
-
+```
 The workflow does not contain a hard-coded GitHub username.
 
 Instead, GitHub Actions checks out the repository where the workflow is installed.
@@ -133,14 +136,14 @@ Example:
 ```
 
 ### Configuration fields
-```
+
 | Field | Description |
 | --- | --- |
 | `username` | Your DEV.to username |
 | `post_count` | Number of articles to display |
 | `enabled` | Enables DEV.to integration |
 | `automation` | Enables GitHub Actions automation |
-```
+
 
 post_count supports values from:
 ```
@@ -224,16 +227,18 @@ The integration validates external URLs before placing them into generated HTML.
 
 Article URLs and cover-image URLs are restricted to:
 
+```
 http://
 
 https://
+```
 
 Unsafe schemes such as:
-
+```
 javascript:
 
 data:
-
+```
 are rejected.
 
 Article titles, descriptions, tags, and author information are HTML-escaped before being inserted into the generated README section.
