@@ -295,23 +295,30 @@ The workflow uses the repository's GitHub Actions token to commit and push the g
 
 # **11\. Architecture**
 
-flowchart TD
-    A["Profile Studio"] --> B["Configure DEV.to"]
-    B --> C["Generate / Download Package"]
-
-    C --> D["User's GitHub Profile Repository"]
-
-    D --> E[".github/profile-studio.json"]
-    D --> F[".github/workflows/devto-readme.yml"]
-    D --> G[".github/scripts/update-devto.js"]
-    D --> H["README.md"]
-
-    E --> F
-    F --> G
-    G --> I["DEV.to API"]
-    I --> J["Fetch Published Articles"]
-
-    J --> G
-    G --> H
-
-    H --> K["DEV.to Articles Section"]
+Profile Studio
+      │
+      ▼
+DEV.to Configuration
+      │
+      ▼
+Download Package
+      │
+      ▼
+User's Profile Repository
+      │
+      ├── .github/profile-studio.json
+      │          │
+      │          ▼
+      │    GitHub Actions
+      │          │
+      │          ▼
+      │      DEV.to API
+      │          │
+      │          ▼
+      │    Fetch Articles
+      │          │
+      │          ▼
+      └──────► README.md
+                   │
+                   ▼
+          DEV.to Articles Section
