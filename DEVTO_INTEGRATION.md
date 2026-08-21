@@ -212,57 +212,7 @@ This is useful when testing the installation or when you want to update the READ
 
 The automation generates a section similar to:
 
-&lt;!-- DEVTO:START --&gt;
-
-\### 📝 Latest DEV.to Articles
-
-&lt;table&gt;
-
-&lt;tr&gt;
-
-&lt;td width="33%" valign="top"&gt;
-
-&lt;a href="<https://dev.to/>..."&gt;
-
-&lt;img src="https://..." width="100%" alt="Article title" /&gt;
-
-&lt;/a&gt;
-
-&lt;br&gt;
-
-&lt;strong&gt;
-
-&lt;a href="<https://dev.to/..."&gt;Article> title&lt;/a&gt;
-
-&lt;/strong&gt;
-
-&lt;br&gt;&lt;br&gt;
-
-Article description...
-
-&lt;br&gt;&lt;br&gt;
-
-&lt;code&gt;#devops&lt;/code&gt; &lt;code&gt;#aws&lt;/code&gt; &lt;code&gt;#cloud&lt;/code&gt;
-
-&lt;br&gt;&lt;br&gt;
-
-&lt;sub&gt;Author · 8/21/2026&lt;/sub&gt;
-
-&lt;br&gt;&lt;br&gt;
-
-&lt;a href="<https://dev.to/>..."&gt;
-
-&lt;strong&gt;Read more ↗&lt;/strong&gt;
-
-&lt;/a&gt;
-
-&lt;/td&gt;
-
-&lt;/tr&gt;
-
-&lt;/table&gt;
-
-\[!\[See more\](<https://img.shields.io/badge/See%20more-%E2%86%92-c900a8?style=for-the-badge)\>](<https://dev.to/yourname>)
+![Dev.to Section](image.png)
 
 &lt;!-- DEVTO:END --&gt;
 
