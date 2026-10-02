@@ -811,10 +811,14 @@ function downloadMd() {
   const blob = new Blob([generate(true)], {
     type: "text/markdown"});
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  a.href = url;
   a.download = "README.md";
+  a.rel = "noopener";
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
   flash("README.md downloaded");
 }
 
