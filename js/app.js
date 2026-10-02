@@ -945,21 +945,27 @@ async function downloadDevToPackage() {
       JSON.stringify(config, null, 2) + "\n"
     );
 
-    const blob = await zip.generateAsync({
-      type: "blob",
+    // Generate real ZIP bytes instead of relying on a Blob during file-system writes.
+    const zipBytes = await zip.generateAsync({
+      type: "uint8array",
       compression: "DEFLATE",
       compressionOptions: { level: 6 }
     });
 
+    if (!zipBytes || !zipBytes.length) {
+      throw new Error("The generated package is empty.");
+    }
+
     if (fileHandle) {
       const writable = await fileHandle.createWritable();
-      await writable.write(blob);
+      await writable.write(zipBytes);
       await writable.close();
       flash("Profile Studio package saved");
       return;
     }
 
     // Fallback for browsers without showSaveFilePicker.
+    const blob = new Blob([zipBytes], { type: "application/zip" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
