@@ -161,9 +161,7 @@
       });
 
       if (socialBadges.length) {
-        L.push("### 🔗 Connect With Me");
-        L.push("");
-        L.push(`<p align="left">`);
+        L.push(`<p align="center">`);
         L.push(socialBadges.join("\n"));
         L.push(`</p>`);
         L.push("");
