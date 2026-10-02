@@ -75,6 +75,17 @@
           <div class="field-hint">Type your name after it (“Hello! I’m Anurag”), replace it entirely, or clear it to hide the header.</div>
         </div>
         <div class="field">
+          <label class="field-label">Profile portrait <span class="opt">— optional Hero visual</span></label>
+          <input class="input" type="file" id="f_portrait" accept="image/jpeg,image/png,image/webp" />
+          <div class="field-hint">Upload a photo. Profile Studio converts it locally into a dot-matrix SVG; your original photo is not packaged.</div>
+          <div class="portrait-controls" id="portraitControls">
+            <label class="checkbox-row"><input type="checkbox" id="f_portraitColor" checked /><span><strong>Use photo colors</strong><small>Keep the portrait in color.</small></span></label>
+            <label class="checkbox-row"><input type="checkbox" id="f_portraitReveal" checked /><span><strong>Reveal animation</strong><small>Build the portrait from top to bottom.</small></span></label>
+            <label class="checkbox-row"><input type="checkbox" id="f_profileViews" /><span><strong>Profile views</strong><small>Show a public profile-view counter beneath your social badges.</small></span></label>
+          </div>
+          <div id="portraitStatus" class="field-hint"></div>
+        </div>
+        <div class="field">
           <label class="field-label" for="f_tagline">Headline 1 <span class="opt">— small line under your name</span></label>
           <input class="input" id="f_tagline" data-key="tagline" placeholder="I do open source :)" />
         </div>
@@ -152,7 +163,7 @@
             <path d="M7 3h10l1 4H6l1-4Z"/>
             <path d="M6 7v14h12V7"/>
           </svg>
-          Download DEV.to package
+          Download Profile Studio package
         </button>
         <button class="btn" id="finishCopyBtn" type="button" hidden>
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -192,7 +203,7 @@
         </p>
 
         <div class="publish-automation" id="finishAutomationGuide" hidden>
-          <div class="publish-title">Set up DEV.to automation</div>
+          <div class="publish-title">Set up Profile Studio automation</div>
 
           <p>
             Because you enabled DEV.to automation, your download also includes
@@ -297,6 +308,7 @@
 
 <script src="js/catalog.js" defer></script>
 <script src="js/security.js" defer></script>
+<script src="js/portrait.js" defer></script>
 <script src="js/state.js" defer></script>
 <script src="js/devto.js" defer></script>
 <script src="js/generator.js" defer></script>
