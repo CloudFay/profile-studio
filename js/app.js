@@ -58,6 +58,10 @@ const {
   fetchDevToArticles,
 } = window.ProfileStudioDevTo;
 
+const {
+  createFromFile: createPortraitFromFile,
+} = window.ProfileStudioPortrait;
+
 // Build a safe github.com profile URL from a (possibly empty) username.
 function ghProfileUrl(user) {
   return "https://github.com/" + encodeURIComponent((user || "your-username").trim());
@@ -280,6 +284,82 @@ function buildAboutFields() {
   makeSortable(wrap, () => state.factOrder, (o) => { state.factOrder = o; });
 }
 
+
+// ─── Hero portrait ───
+async function handlePortraitUpload(file) {
+  const status = document.getElementById("portraitStatus");
+  if (!file) return;
+  if (status) status.textContent = "Generating dot portrait locally…";
+
+  try {
+    state.hero.portraitSvg = await createPortraitFromFile(file, {
+      cols: 100,
+      color: !!state.hero.portraitColor,
+      reveal: !!state.hero.portraitReveal,
+      revealTime: 2.5,
+      revealFade: 0.45,
+      detail: 0.5,
+      contrast: 1.25,
+      floor: 0.06,
+      dotScale: 0.92
+    });
+    state.hero.portraitEnabled = true;
+    persist(state);
+    if (status) status.textContent = "Portrait ready. Your original photo stays in your browser.";
+    render();
+  } catch (error) {
+    console.error("Portrait generation error:", error);
+    state.hero.portraitEnabled = false;
+    state.hero.portraitSvg = "";
+    persist(state);
+    if (status) status.textContent = error.message || "Could not generate the portrait.";
+    render();
+  }
+}
+
+function buildHeroConfig() {
+  const fileInput = document.getElementById("f_portrait");
+  const color = document.getElementById("f_portraitColor");
+  const reveal = document.getElementById("f_portraitReveal");
+  const views = document.getElementById("f_profileViews");
+
+  if (color) color.checked = !!state.hero.portraitColor;
+  if (reveal) reveal.checked = !!state.hero.portraitReveal;
+  if (views) views.checked = !!state.hero.profileViews;
+
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      handlePortraitUpload(fileInput.files && fileInput.files[0]);
+    });
+  }
+
+  if (color) color.addEventListener("change", async () => {
+    state.hero.portraitColor = color.checked;
+    persist(state);
+    const file = fileInput && fileInput.files && fileInput.files[0];
+    if (file) await handlePortraitUpload(file); else render();
+  });
+
+  if (reveal) reveal.addEventListener("change", async () => {
+    state.hero.portraitReveal = reveal.checked;
+    persist(state);
+    const file = fileInput && fileInput.files && fileInput.files[0];
+    if (file) await handlePortraitUpload(file); else render();
+  });
+
+  if (views) views.addEventListener("change", () => {
+    state.hero.profileViews = views.checked;
+    persist(state);
+    updatePackageButtonVisibility();
+    render();
+  });
+
+  const status = document.getElementById("portraitStatus");
+  if (status && state.hero.portraitEnabled) {
+    status.textContent = "Portrait ready. Download the Profile Studio package to include it.";
+  }
+}
+
 // ─── socials (dynamic + draggable) ───
 function buildSocials() {
   const wrap = document.getElementById("socials");
@@ -495,9 +575,12 @@ function updatePackageButtonVisibility() {
   );
 
   if (button) {
-    button.hidden =
-      !state.addons.devto ||
-      !state.addons.devtoAutomation;
+    button.hidden = !(
+      state.hero.portraitEnabled ||
+      state.hero.profileViews ||
+      state.addons.activity ||
+      (state.addons.devto && state.addons.devtoAutomation)
+    );
   }
 
   updateAutomationGuideVisibility();
@@ -510,9 +593,12 @@ function updateAutomationGuideVisibility() {
 
   if (!guide) return;
 
-  guide.hidden =
-    !state.addons.devto ||
-    !state.addons.devtoAutomation;
+  guide.hidden = !(
+    state.hero.portraitEnabled ||
+    state.hero.profileViews ||
+    state.addons.activity ||
+    (state.addons.devto && state.addons.devtoAutomation)
+  );
 }
 
 function buildDevToConfig() {
@@ -748,100 +834,86 @@ async function downloadDevToPackage() {
     return;
   }
 
-  if (!state.addons.devtoAutomation) {
-    flash("Enable DEV.to automation first");
+  const needsPackage =
+    state.hero.portraitEnabled ||
+    state.hero.profileViews ||
+    state.addons.activity ||
+    (state.addons.devto && state.addons.devtoAutomation);
+
+  if (!needsPackage) {
+    flash("Enable a Profile Studio automation feature first");
     return;
   }
 
   try {
-    flash("Preparing automation package…");
+    flash("Preparing Profile Studio package…");
+    const zip = new JSZip();
+    zip.file("README.md", generate(true));
 
-    const devtoUsername = normalizeDevToUsername(
-      state.devtoUsername
-    );
+    const config = {
+      version: 2,
+      hero: {
+        profile_views: !!state.hero.profileViews,
+        portrait: !!state.hero.portraitEnabled
+      },
+      activity: {
+        enabled: !!state.addons.activity,
+        theme: "github-compact"
+      }
+    };
 
-    if (!devtoUsername) {
-      flash("Enter your DEV.to username first");
-      return;
+    if (state.addons.devto && state.addons.devtoAutomation) {
+      const devtoUsername = normalizeDevToUsername(state.devtoUsername);
+      if (!devtoUsername) {
+        flash("Enter your DEV.to username first");
+        return;
+      }
+      config.devto = {
+        post_count: Math.min(Math.max(Number(state.devtoPostCount) || 5, 1), 20),
+        username: devtoUsername,
+        enabled: true,
+        automation: true
+      };
+      const [updateScript, devtoWorkflow] = await Promise.all([
+        fetchTextFile("https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/scripts/update-devto.js"),
+        fetchTextFile("https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/workflows/devto-readme.yml")
+      ]);
+      zip.file(".github/scripts/update-devto.js", updateScript);
+      zip.file(".github/workflows/devto-readme.yml", devtoWorkflow);
     }
 
-    const [
-      updateScript,
-      workflow,
-    ] = await Promise.all([
-      fetchTextFile(
-        "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/scripts/update-devto.js"
-      ),
-      fetchTextFile(
-        "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/workflows/devto-readme.yml"
-      ),
-    ]);
+    if (state.hero.portraitEnabled && state.hero.portraitSvg) {
+      zip.file("assets/profile-studio/portrait.svg", state.hero.portraitSvg);
+    }
 
-    const zip = new JSZip();
+    if (state.addons.activity) {
+      const activityWorkflow = await fetchTextFile(
+        "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/templates/profile-studio-activity.yml"
+      );
+      zip.file(".github/workflows/profile-studio-activity.yml", activityWorkflow);
+    }
 
-    zip.file(
-      "README.md",
-      generate(true)
-    );
-
-    zip.file(
-      ".github/profile-studio.json",
-      JSON.stringify(
-        {
-          devto: {
-            post_count: Math.min(
-              Math.max(
-                Number(state.devtoPostCount) || 5,
-                1
-              ),
-              20
-            ),
-            username: devtoUsername,
-            enabled: true,
-            automation: true,
-          },
-        },
-        null,
-        2
-      ) + "\n"
-    );
-
-    zip.file(
-      ".github/scripts/update-devto.js",
-      updateScript
-    );
-
-    zip.file(
-      ".github/workflows/devto-readme.yml",
-      workflow
-    );
+    zip.file(".github/profile-studio.json", JSON.stringify(config, null, 2) + "\n");
 
     const blob = await zip.generateAsync({
       type: "blob",
       compression: "DEFLATE",
-      compressionOptions: {
-        level: 6,
-      },
+      compressionOptions: { level: 6 }
     });
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-
     a.href = url;
-    a.download = `${(state.username || "github-profile").trim()}-profile-studio.zip`;
-
+    a.download = (state.username || "github-profile").trim() + "-profile-studio.zip";
     document.body.appendChild(a);
     a.click();
     a.remove();
 
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1000);
-
-    flash("Automation package downloaded");
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    flash("Profile Studio package downloaded");
   } catch (error) {
     console.error("Profile Studio package error:", error);
-    flash("Could not create the automation package");
+    flash("Could not create the Profile Studio package");
   }
 }
 
@@ -920,6 +992,7 @@ function wireEvents() {
   const g = document.getElementById("f_greeting");
   if (g) { g.value = state.greeting == null ? "Hello! I'm" : state.greeting; g.addEventListener("input", () => { state.greeting = g.value; persist(state); render(); }); }
   buildHeadlineColors();
+  buildHeroConfig();
   updatePackageButtonVisibility();
 }
 
