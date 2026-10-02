@@ -407,6 +407,11 @@ const ADDONS = [
     desc: "A themed line graph of your recent activity.",
   },
   {
+    key: "snake",
+    title: "Contribution snake",
+    desc: "An animated snake built from your GitHub contribution grid.",
+  },
+  {
     key: "quote",
     title: "Random dev quote",
     desc: "A developer quote that refreshes on every visit.",
@@ -844,6 +849,7 @@ async function downloadDevToPackage() {
     state.hero.portraitEnabled ||
     state.hero.profileViews ||
     state.addons.activity ||
+    state.addons.snake ||
     (state.addons.devto && state.addons.devtoAutomation);
 
   if (!needsPackage) {
@@ -888,6 +894,9 @@ async function downloadDevToPackage() {
       activity: {
         enabled: !!state.addons.activity,
         theme: "github-compact"
+      },
+      snake: {
+        enabled: !!state.addons.snake
       }
     };
 
@@ -929,7 +938,7 @@ async function downloadDevToPackage() {
       );
     }
 
-    if (state.addons.activity) {
+    if (state.addons.activity || state.addons.snake) {
       const activityWorkflow = await fetchTextFile(
         "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/templates/profile-studio-activity.yml"
       );

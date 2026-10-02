@@ -123,7 +123,7 @@ The Contribution Activity section can be generated through GitHub Actions using:
 maurodesouza/github-readme-activity-graph-action
 ```
 
-Profile Studio generates the workflow and publishes the resulting SVG to an `output` branch using the `github-compact` theme.
+Profile Studio generates the workflow and publishes the activity graph and contribution snake assets to an `output` branch. The activity graph uses the `github-compact` theme, while the snake includes light and dark SVG variants plus a GIF.
 
 ## 📝 About Section
 

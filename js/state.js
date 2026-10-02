@@ -63,6 +63,7 @@
         stats: true,
         langs: true,
         activity: true,
+        snake: true,
         quote: true,
         devto: false,
         devtoAutomation: false,
