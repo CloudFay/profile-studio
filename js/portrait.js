@@ -426,7 +426,7 @@
 
       if (
         !file ||
-        !/^image\\/(jpeg|png|webp)$/i.test(file.type)
+        !/^image\/(jpeg|png|webp)$/i.test(file.type)
       ) {
         throw new Error(
           "Choose a JPG, PNG, or WebP image."
