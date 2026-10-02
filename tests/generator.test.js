@@ -223,6 +223,7 @@ test("generates GitHub stats and language cards", () => {
 
   assert.match(output, /GitHub Stats/);
   assert.match(output, /show_icons=true/);
+  assert.match(output, /cache_seconds=21600/);
   assert.match(output, /top-langs/);
 });
 
