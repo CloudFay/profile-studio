@@ -25,7 +25,7 @@ test("generates a dot-matrix SVG from image data", () => {
     }
   );
 
-  assert.match(svg, /<circle\\b/);
+  assert.match(svg, /<circle\b/);
 });
 
 test("can generate a static color portrait", () => {
