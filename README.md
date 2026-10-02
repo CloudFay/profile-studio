@@ -86,6 +86,45 @@ The generated Markdown is ready to paste directly into your GitHub profile repos
 
 ---
 
+## ✨ Profile Experience
+
+Profile Studio can turn the top of your README into a richer GitHub profile Hero.
+
+### Animated Dot-Matrix Portrait
+
+Upload a JPG, PNG, or WebP photo and Profile Studio converts it locally into a self-contained SVG dot portrait.
+
+The portrait uses:
+
+- image luminance
+- histogram equalization
+- detail enhancement
+- variable-radius dots
+- optional source-photo colors
+- row-by-row SVG reveal animation
+
+Your original photo stays in the browser. The generated package contains only:
+
+```text
+assets/profile-studio/portrait.svg
+```
+
+### Profile Views
+
+Add a public profile-view counter to the Hero using GitHub Profile Views Counter.
+
+The counter measures profile page hits; it does not identify individual visitors.
+
+### Contribution Activity
+
+The Contribution Activity section can be generated through GitHub Actions using:
+
+```text
+maurodesouza/github-readme-activity-graph-action
+```
+
+Profile Studio generates the workflow and publishes the resulting SVG to an `output` branch using the `github-compact` theme.
+
 ## 📝 About Section
 
 Build an About section with configurable profile information.
@@ -138,6 +177,19 @@ Supported platforms include:
 - And more
 
 ---
+
+## 📦 Profile Studio Package
+
+When a feature requires generated assets or GitHub Actions, Profile Studio can download a complete package containing the README, configuration, generated portrait asset, and required workflows.
+
+The package can combine:
+
+- dot-matrix portrait
+- profile views
+- Contribution Activity
+- DEV.to automation
+
+Existing README content is not overwritten by the generated automation.
 
 ## 📊 GitHub Widgets
 
