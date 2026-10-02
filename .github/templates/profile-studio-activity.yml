@@ -1,4 +1,4 @@
-name: Update Profile Studio Activity Graph
+name: Update Profile Studio Contribution Activity
 
 on:
   push:
@@ -27,7 +27,17 @@ jobs:
           output_path: dist/activity-graph.svg
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish activity graph
+      - name: Generate snake animations
+        uses: Platane/snk@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          outputs: |
+            dist/snake.svg
+            dist/snake-dark.svg?palette=github-dark
+            dist/snake.gif?color_snake=#39d353&color_dots=#161b22,#0e4429,#006d32,#26a641,#39d353
+
+      - name: Publish contribution assets
         uses: crazy-max/ghaction-github-pages@v5
         with:
           target_branch: output
