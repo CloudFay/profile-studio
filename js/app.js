@@ -305,6 +305,7 @@ async function handlePortraitUpload(file) {
     });
     state.hero.portraitEnabled = true;
     persist(state);
+    updatePackageButtonVisibility();
     if (status) status.textContent = "Portrait ready. Your original photo stays in your browser.";
     render();
   } catch (error) {
@@ -312,6 +313,7 @@ async function handlePortraitUpload(file) {
     state.hero.portraitEnabled = false;
     state.hero.portraitSvg = "";
     persist(state);
+    updatePackageButtonVisibility();
     if (status) status.textContent = error.message || "Could not generate the portrait.";
     render();
   }
@@ -931,6 +933,14 @@ function doReset() {
   document.querySelectorAll("#socials input").forEach((i) => (i.value = ""));
   const gEl = document.getElementById("f_greeting"); if (gEl) gEl.value = state.greeting;
   buildCatalog(); buildSocials(); buildAboutFields(); buildAddons(); buildHeadlineColors();
+  const portraitFile = document.getElementById("f_portrait");
+  const portraitColor = document.getElementById("f_portraitColor");
+  const portraitReveal = document.getElementById("f_portraitReveal");
+  const profileViews = document.getElementById("f_profileViews");
+  if (portraitFile) portraitFile.value = "";
+  if (portraitColor) portraitColor.checked = true;
+  if (portraitReveal) portraitReveal.checked = true;
+  if (profileViews) profileViews.checked = false;
   goStep(0); render();
 }
 
