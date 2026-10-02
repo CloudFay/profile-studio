@@ -36,6 +36,7 @@
       const uEnc = encodeURIComponent(user);
       const ac = (s.accent || "#2ea043").replace("#", "");
       const a = s.addons;
+      const hero = s.hero || {};
       const th = statTheme(documentRef);
       const L = [];
 
@@ -72,34 +73,115 @@
         s.greeting == null ? "Hello! I'm" : s.greeting
       ).trim();
 
+      if (hero.portraitEnabled && hero.portraitSvg) {
+        const portraitSrc = readmeMode
+          ? "./assets/profile-studio/portrait.svg"
+          : (window.ProfileStudioPortrait
+              ? window.ProfileStudioPortrait.svgToDataUri(hero.portraitSvg)
+              : "");
+
+        if (portraitSrc) {
+          L.push('<p align="center">');
+          L.push(
+            '  <img width="260" src="' +
+              portraitSrc +
+              '" alt="Dot-matrix profile portrait" />'
+          );
+          L.push('</p>');
+          L.push("");
+        }
+      }
+
       if (greeting) {
         const headerWidth = Math.min(
           1200,
           Math.max(420, greeting.length * 32 + 90)
         );
 
-        L.push(`<p align="center">`);
+        L.push('<p align="center">');
+        L.push('  <a href="' + ghProfileUrl(user) + '">');
         L.push(
-          `  <a href="${ghProfileUrl(user)}">`
+          '    <img src="https://capsule-render.vercel.app/api?type=transparent&fontColor=' +
+            ac +
+            '&fontSize=54&height=90&width=' +
+            headerWidth +
+            '&text=' +
+            encodeURIComponent(greeting) +
+            '" alt="' +
+            escapeHtml(greeting) +
+            '" />'
         );
-        L.push(
-          `    <img src="https://capsule-render.vercel.app/api?type=transparent&fontColor=${ac}&fontSize=54&height=90&width=${headerWidth}&text=${encodeURIComponent(greeting)}" alt="${escapeHtml(greeting)}" />`
-        );
-        L.push(`  </a>`);
-        L.push(`</p>`);
+        L.push('  </a>');
+        L.push('</p>');
       }
 
       if (typeLines.length) {
         L.push("");
-        L.push(`<p align="center">`);
+        L.push('<p align="center">');
         L.push(
-          `  <img src="https://readme-typing-svg.demolab.com?font=Caveat&weight=600&size=26&pause=1000&color=${hlc}&center=true&vCenter=true&width=${subWidth}&height=44&lines=${linesParam}" alt="Typing headlines" />`
+          '  <img src="https://readme-typing-svg.demolab.com?font=Caveat&weight=600&size=26&pause=1000&color=' +
+            hlc +
+            '&center=true&vCenter=true&width=' +
+            subWidth +
+            '&height=44&lines=' +
+            linesParam +
+            '" alt="Typing headlines" />'
         );
-        L.push(`</p>`);
+        L.push('</p>');
       }
 
       L.push("");
       L.push("");
+      // ───────── CONNECT ─────────
+      const socialBadges = [];
+
+      (s.socialOrder || []).forEach((key) => {
+        const cfg = socials[key];
+        const value = (s.socials[key] || "").trim();
+
+        if (!cfg || !value) return;
+
+        const href =
+          /^https?:\/\//.test(value) ||
+          value.startsWith("mailto:")
+            ? value
+            : cfg.prefix + value;
+
+        socialBadges.push(
+          `  <a href="${escapeHtml(
+            href
+          )}" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/${shEscape(
+            cfg.label
+          )}-${cfg.color}?style=${s.badgeStyle}&logo=${
+            cfg.logo
+          }&logoColor=white" alt="${escapeHtml(
+            cfg.label
+          )}" /></a>`
+        );
+      });
+
+      if (socialBadges.length) {
+        L.push("### 🔗 Connect With Me");
+        L.push("");
+        L.push(`<p align="left">`);
+        L.push(socialBadges.join("\n"));
+        L.push(`</p>`);
+        L.push("");
+      }
+
+      if (hero.profileViews && user) {
+        const viewsUrl =
+          "https://komarev.com/ghpvc/?username=" +
+          uEnc +
+          "&label=profile%20views&color=" +
+          ac +
+          "&style=flat";
+
+        L.push('<p align="center">');
+        L.push('  <img src="' + viewsUrl + '" alt="Profile views" />');
+        L.push('</p>');
+        L.push("");
+      }
 
       // ───────── ABOUT ─────────
       const facts = [];
@@ -168,43 +250,6 @@
         L.push("");
       }
 
-      // ───────── CONNECT ─────────
-      const socialBadges = [];
-
-      (s.socialOrder || []).forEach((key) => {
-        const cfg = socials[key];
-        const value = (s.socials[key] || "").trim();
-
-        if (!cfg || !value) return;
-
-        const href =
-          /^https?:\/\//.test(value) ||
-          value.startsWith("mailto:")
-            ? value
-            : cfg.prefix + value;
-
-        socialBadges.push(
-          `  <a href="${escapeHtml(
-            href
-          )}" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/${shEscape(
-            cfg.label
-          )}-${cfg.color}?style=${s.badgeStyle}&logo=${
-            cfg.logo
-          }&logoColor=white" alt="${escapeHtml(
-            cfg.label
-          )}" /></a>`
-        );
-      });
-
-      if (socialBadges.length) {
-        L.push("### 🔗 Connect With Me");
-        L.push("");
-        L.push(`<p align="left">`);
-        L.push(socialBadges.join("\n"));
-        L.push(`</p>`);
-        L.push("");
-      }
-
       // ───────── STATS ─────────
       const cardColors =
         `&title_color=${ac}` +
@@ -241,13 +286,19 @@
       }
 
       if (user && a.activity) {
-        L.push("### 📈 Contribution Graph");
+        L.push("### 📈 Contribution Activity");
         L.push("");
-        L.push(`<p align="center">`);
-        L.push(
-          `  <img width="100%" src="https://github-readme-activity-graph.vercel.app/graph?username=${uEnc}&bg_color=00000000&color=${ac}&line=${ac}&point=${sText}&area=true&hide_border=true" alt="activity graph" />`
-        );
-        L.push(`</p>`);
+        if (readmeMode) {
+          L.push('<p align="center">');
+          L.push('  <img width="100%" src="https://raw.githubusercontent.com/' +
+              encodeURIComponent(user) +
+              '/' +
+              encodeURIComponent(user) +
+              '/output/activity-graph.svg" alt="GitHub contribution activity graph" />');
+          L.push('</p>');
+        } else {
+          L.push('<p align="center"><strong>GitHub Activity Graph</strong><br><small>This graph is generated by the Profile Studio GitHub Action after you publish the package.</small></p>');
+        }
         L.push("");
       }
 

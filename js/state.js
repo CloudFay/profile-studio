@@ -17,6 +17,14 @@
       greeting: "Hello! I'm",
       headlineColor: "#a371f7",
 
+      hero: {
+        portraitEnabled: false,
+        portraitSvg: "",
+        portraitColor: true,
+        portraitReveal: true,
+        profileViews: false,
+      },
+
       bio: "",
       working: "",
       learning: "",
@@ -100,6 +108,11 @@
           state.addons = Object.assign(
             defaultState().addons,
             raw.addons || {}
+          );
+
+          state.hero = Object.assign(
+            defaultState().hero,
+            raw.hero || {}
           );
 
           state.devtoCache = Object.assign(

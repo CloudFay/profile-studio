@@ -75,6 +75,17 @@
           <div class="field-hint">Type your name after it (“Hello! I’m Anurag”), replace it entirely, or clear it to hide the header.</div>
         </div>
         <div class="field">
+          <label class="field-label">Profile portrait <span class="opt">— optional Hero visual</span></label>
+          <input class="input" type="file" id="f_portrait" accept="image/jpeg,image/png,image/webp" />
+          <div class="field-hint">Upload a photo. Profile Studio converts it locally into a dot-matrix SVG; your original photo is not packaged.</div>
+          <div class="portrait-controls" id="portraitControls">
+            <label class="checkbox-row"><input type="checkbox" id="f_portraitColor" checked /><span><strong>Use photo colors</strong><small>Keep the portrait in color.</small></span></label>
+            <label class="checkbox-row"><input type="checkbox" id="f_portraitReveal" checked /><span><strong>Reveal animation</strong><small>Build the portrait from top to bottom.</small></span></label>
+            <label class="checkbox-row"><input type="checkbox" id="f_profileViews" /><span><strong>Profile views</strong><small>Show a public profile-view counter beneath your social badges.</small></span></label>
+          </div>
+          <div id="portraitStatus" class="field-hint"></div>
+        </div>
+        <div class="field">
           <label class="field-label" for="f_tagline">Headline 1 <span class="opt">— small line under your name</span></label>
           <input class="input" id="f_tagline" data-key="tagline" placeholder="I do open source :)" />
         </div>
@@ -152,7 +163,7 @@
             <path d="M7 3h10l1 4H6l1-4Z"/>
             <path d="M6 7v14h12V7"/>
           </svg>
-          Download DEV.to package
+          Download Profile Studio package
         </button>
         <button class="btn" id="finishCopyBtn" type="button" hidden>
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -192,63 +203,41 @@
         </p>
 
         <div class="publish-automation" id="finishAutomationGuide" hidden>
-          <div class="publish-title">Set up DEV.to automation</div>
+          <div class="publish-title">Set up Profile Studio automation</div>
 
           <p>
-            Because you enabled DEV.to automation, your download also includes
-            everything needed to keep your profile README's DEV.to section updated
-            automatically.
+            Your package contains the files required for the dynamic features you enabled.
+            Copy the package contents into the root of your GitHub profile repository.
           </p>
 
           <ol class="publish-steps">
             <li>
-              Download the <strong>DEV.to package</strong> above and open the ZIP file.
+              Create or open your public profile repository named exactly the same as your GitHub username.
             </li>
-
             <li>
-              Copy the contents of the ZIP into the root of your GitHub profile
-              repository. If you already have a <code>.github</code> folder, merge
-              the files into it — do not delete your existing workflows.
+              Copy the downloaded package contents into the repository. Merge the
+              <code>.github</code> folder if you already have workflows.
             </li>
-
             <li>
-              Make sure the repository contains:
-              <pre><code>README.md
-      .github/
-      ├── profile-studio.json
-      ├── scripts/
-      │   └── update-devto.js
-      └── workflows/
-          └── devto-readme.yml</code></pre>
+              If you enabled the dot-matrix portrait, keep
+              <code>assets/profile-studio/portrait.svg</code> in place.
             </li>
-
             <li>
-              Commit and push the files to your profile repository.
+              If you enabled Contribution Activity, allow GitHub Actions to write to the
+              repository and run <strong>Update Profile Studio Activity Graph</strong> once.
+              The generated graph is published to the <code>output</code> branch.
             </li>
-
             <li>
-              Open the repository's <strong>Actions</strong> tab and select
-              <strong>Update DEV.to Articles</strong>.
-            </li>
-
-            <li>
-              Select <strong>Run workflow</strong> to perform the first
-              synchronization.
-            </li>
-
-            <li>
-              After the first successful run, GitHub Actions will periodically
-              check DEV.to and update the DEV.to section of your README automatically.
+              If you enabled DEV.to automation, keep its generated workflow and configuration
+              alongside the other Profile Studio files.
             </li>
           </ol>
 
           <p>
-            The automation only updates the section between
-            <code>&lt;!-- DEVTO:START --&gt;</code> and
-            <code>&lt;!-- DEVTO:END --&gt;</code>.
-            The rest of your README is left untouched.
+            Profile Studio only updates the dynamic assets/features you enabled.
+            Your main README content remains yours.
           </p>
-        </div>
+                </div>
       </div>
 
       <div class="finish-foot">
@@ -297,6 +286,7 @@
 
 <script src="js/catalog.js" defer></script>
 <script src="js/security.js" defer></script>
+<script src="js/portrait.js" defer></script>
 <script src="js/state.js" defer></script>
 <script src="js/devto.js" defer></script>
 <script src="js/generator.js" defer></script>
