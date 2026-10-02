@@ -847,8 +847,31 @@ async function downloadDevToPackage() {
     return;
   }
 
+  const fileName =
+    ((state.username || "github-profile").trim() || "github-profile") +
+    "-profile-studio.zip";
+
+  let fileHandle = null;
+
   try {
+    // Reserve the browser's user gesture before any async fetch/ZIP work.
+    // Chrome/Edge can otherwise block the later programmatic download.
+    if (typeof window.showSaveFilePicker === "function") {
+      fileHandle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: "Profile Studio package",
+            accept: {
+              "application/zip": [".zip"],
+            },
+          },
+        ],
+      });
+    }
+
     flash("Preparing Profile Studio package…");
+
     const zip = new JSZip();
     zip.file("README.md", generate(true));
 
@@ -866,36 +889,57 @@ async function downloadDevToPackage() {
 
     if (state.addons.devto && state.addons.devtoAutomation) {
       const devtoUsername = normalizeDevToUsername(state.devtoUsername);
+
       if (!devtoUsername) {
         flash("Enter your DEV.to username first");
         return;
       }
+
       config.devto = {
-        post_count: Math.min(Math.max(Number(state.devtoPostCount) || 5, 1), 20),
+        post_count: Math.min(
+          Math.max(Number(state.devtoPostCount) || 5, 1),
+          20
+        ),
         username: devtoUsername,
         enabled: true,
         automation: true
       };
+
       const [updateScript, devtoWorkflow] = await Promise.all([
-        fetchTextFile("https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/scripts/update-devto.js"),
-        fetchTextFile("https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/workflows/devto-readme.yml")
+        fetchTextFile(
+          "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/scripts/update-devto.js"
+        ),
+        fetchTextFile(
+          "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/workflows/devto-readme.yml"
+        )
       ]);
+
       zip.file(".github/scripts/update-devto.js", updateScript);
       zip.file(".github/workflows/devto-readme.yml", devtoWorkflow);
     }
 
     if (state.hero.portraitEnabled && state.hero.portraitSvg) {
-      zip.file("assets/profile-studio/portrait.svg", state.hero.portraitSvg);
+      zip.file(
+        "assets/profile-studio/portrait.svg",
+        state.hero.portraitSvg
+      );
     }
 
     if (state.addons.activity) {
       const activityWorkflow = await fetchTextFile(
         "https://raw.githubusercontent.com/CloudFay/profile-studio/main/.github/templates/profile-studio-activity.yml"
       );
-      zip.file(".github/workflows/profile-studio-activity.yml", activityWorkflow);
+
+      zip.file(
+        ".github/workflows/profile-studio-activity.yml",
+        activityWorkflow
+      );
     }
 
-    zip.file(".github/profile-studio.json", JSON.stringify(config, null, 2) + "\n");
+    zip.file(
+      ".github/profile-studio.json",
+      JSON.stringify(config, null, 2) + "\n"
+    );
 
     const blob = await zip.generateAsync({
       type: "blob",
@@ -903,10 +947,20 @@ async function downloadDevToPackage() {
       compressionOptions: { level: 6 }
     });
 
+    if (fileHandle) {
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      flash("Profile Studio package saved");
+      return;
+    }
+
+    // Fallback for browsers without showSaveFilePicker.
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = (state.username || "github-profile").trim() + "-profile-studio.zip";
+    a.download = fileName;
+    a.rel = "noopener";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -914,6 +968,11 @@ async function downloadDevToPackage() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     flash("Profile Studio package downloaded");
   } catch (error) {
+    if (error && error.name === "AbortError") {
+      flash("Download cancelled");
+      return;
+    }
+
     console.error("Profile Studio package error:", error);
     flash("Could not create the Profile Studio package");
   }
