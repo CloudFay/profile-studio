@@ -206,60 +206,38 @@
           <div class="publish-title">Set up Profile Studio automation</div>
 
           <p>
-            Because you enabled DEV.to automation, your download also includes
-            everything needed to keep your profile README's DEV.to section updated
-            automatically.
+            Your package contains the files required for the dynamic features you enabled.
+            Copy the package contents into the root of your GitHub profile repository.
           </p>
 
           <ol class="publish-steps">
             <li>
-              Download the <strong>DEV.to package</strong> above and open the ZIP file.
+              Create or open your public profile repository named exactly the same as your GitHub username.
             </li>
-
             <li>
-              Copy the contents of the ZIP into the root of your GitHub profile
-              repository. If you already have a <code>.github</code> folder, merge
-              the files into it — do not delete your existing workflows.
+              Copy the downloaded package contents into the repository. Merge the
+              <code>.github</code> folder if you already have workflows.
             </li>
-
             <li>
-              Make sure the repository contains:
-              <pre><code>README.md
-      .github/
-      ├── profile-studio.json
-      ├── scripts/
-      │   └── update-devto.js
-      └── workflows/
-          └── devto-readme.yml</code></pre>
+              If you enabled the dot-matrix portrait, keep
+              <code>assets/profile-studio/portrait.svg</code> in place.
             </li>
-
             <li>
-              Commit and push the files to your profile repository.
+              If you enabled Contribution Activity, allow GitHub Actions to write to the
+              repository and run <strong>Update Profile Studio Activity Graph</strong> once.
+              The generated graph is published to the <code>output</code> branch.
             </li>
-
             <li>
-              Open the repository's <strong>Actions</strong> tab and select
-              <strong>Update DEV.to Articles</strong>.
-            </li>
-
-            <li>
-              Select <strong>Run workflow</strong> to perform the first
-              synchronization.
-            </li>
-
-            <li>
-              After the first successful run, GitHub Actions will periodically
-              check DEV.to and update the DEV.to section of your README automatically.
+              If you enabled DEV.to automation, keep its generated workflow and configuration
+              alongside the other Profile Studio files.
             </li>
           </ol>
 
           <p>
-            The automation only updates the section between
-            <code>&lt;!-- DEVTO:START --&gt;</code> and
-            <code>&lt;!-- DEVTO:END --&gt;</code>.
-            The rest of your README is left untouched.
+            Profile Studio only updates the dynamic assets/features you enabled.
+            Your main README content remains yours.
           </p>
-        </div>
+                </div>
       </div>
 
       <div class="finish-foot">
