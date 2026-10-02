@@ -248,6 +248,21 @@ test("generates contribution graph", () => {
   );
 });
 
+test("generates contribution snake", () => {
+  const state = createState();
+
+  state.addons.snake = true;
+
+  const output = generate(
+    state,
+    createOptions()
+  );
+
+  assert.match(output, /Contribution Activity/);
+  assert.match(output, /snake\.svg/);
+  assert.match(output, /snake-dark\.svg/);
+});
+
 test("generates developer quote", () => {
   const state = createState();
 
