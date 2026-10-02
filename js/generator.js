@@ -269,7 +269,7 @@
 
         if (a.stats) {
           L.push(
-            `  <img height="165" src="https://${statsHost}/api?username=${uEnc}&show_icons=true&theme=${th}${cardColors}&count_private=true" alt="stats" />`
+            `  <img height="165" src="https://${statsHost}/api?username=${uEnc}&show_icons=true&theme=${th}${cardColors}&count_private=true&cache_seconds=21600" alt="stats" />`
           );
         }
 
