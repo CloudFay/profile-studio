@@ -1,6 +1,9 @@
 name: Update Profile Studio Activity Graph
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: "0 */12 * * *"
   workflow_dispatch:
