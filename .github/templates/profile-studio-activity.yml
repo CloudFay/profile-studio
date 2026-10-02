@@ -19,10 +19,10 @@ jobs:
       - name: Generate activity graph
         uses: maurodesouza/github-readme-activity-graph-action@v1
         with:
-          username: ${ github.repository_owner }}
+          username: ${{ github.repository_owner }}
           options: theme=github-compact&hide_border=true&bg_color=00000000&days=31&radius=8
           output_path: dist/activity-graph.svg
-          token: ${ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish activity graph
         uses: crazy-max/ghaction-github-pages@v3.1.0
