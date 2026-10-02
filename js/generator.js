@@ -132,6 +132,57 @@
 
       L.push("");
       L.push("");
+      // ───────── CONNECT ─────────
+      const socialBadges = [];
+
+      (s.socialOrder || []).forEach((key) => {
+        const cfg = socials[key];
+        const value = (s.socials[key] || "").trim();
+
+        if (!cfg || !value) return;
+
+        const href =
+          /^https?:\/\//.test(value) ||
+          value.startsWith("mailto:")
+            ? value
+            : cfg.prefix + value;
+
+        socialBadges.push(
+          `  <a href="${escapeHtml(
+            href
+          )}" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/${shEscape(
+            cfg.label
+          )}-${cfg.color}?style=${s.badgeStyle}&logo=${
+            cfg.logo
+          }&logoColor=white" alt="${escapeHtml(
+            cfg.label
+          )}" /></a>`
+        );
+      });
+
+      if (socialBadges.length) {
+        L.push("### 🔗 Connect With Me");
+        L.push("");
+        L.push(`<p align="left">`);
+        L.push(socialBadges.join("\n"));
+        L.push(`</p>`);
+        L.push("");
+      }
+
+      if (hero.profileViews && user) {
+        const viewsUrl =
+          "https://komarev.com/ghpvc/?username=" +
+          uEnc +
+          "&label=profile%20views&color=" +
+          ac +
+          "&style=flat";
+
+        L.push('<p align="center">');
+        L.push('  <img src="' + viewsUrl + '" alt="Profile views" />');
+        L.push('</p>');
+        L.push("");
+      }
+
       // ───────── ABOUT ─────────
       const facts = [];
 
@@ -196,57 +247,6 @@
         );
 
         L.push(`</p>`);
-        L.push("");
-      }
-
-      // ───────── CONNECT ─────────
-      const socialBadges = [];
-
-      (s.socialOrder || []).forEach((key) => {
-        const cfg = socials[key];
-        const value = (s.socials[key] || "").trim();
-
-        if (!cfg || !value) return;
-
-        const href =
-          /^https?:\/\//.test(value) ||
-          value.startsWith("mailto:")
-            ? value
-            : cfg.prefix + value;
-
-        socialBadges.push(
-          `  <a href="${escapeHtml(
-            href
-          )}" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/${shEscape(
-            cfg.label
-          )}-${cfg.color}?style=${s.badgeStyle}&logo=${
-            cfg.logo
-          }&logoColor=white" alt="${escapeHtml(
-            cfg.label
-          )}" /></a>`
-        );
-      });
-
-      if (socialBadges.length) {
-        L.push("### 🔗 Connect With Me");
-        L.push("");
-        L.push(`<p align="left">`);
-        L.push(socialBadges.join("\n"));
-        L.push(`</p>`);
-        L.push("");
-      }
-
-      if (hero.profileViews && user) {
-        const viewsUrl =
-          "https://komarev.com/ghpvc/?username=" +
-          uEnc +
-          "&label=profile%20views&color=" +
-          ac +
-          "&style=flat";
-
-        L.push('<p align="center">');
-        L.push('  <img src="' + viewsUrl + '" alt="Profile views" />');
-        L.push('</p>');
         L.push("");
       }
 
