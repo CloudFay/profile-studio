@@ -140,8 +140,9 @@ test("generates a basic profile README", () => {
   );
   assert.match(output, /Tech Stack/);
   assert.match(output, /JavaScript/);
-  assert.match(output, /Connect With Me/);
+  assert.match(output, /<p align="center">/);
   assert.match(output, /CloudFay/);
+  assert.doesNotMatch(output, /Connect With Me/);
 });
 
 test("does not generate greeting when greeting is empty", () => {
