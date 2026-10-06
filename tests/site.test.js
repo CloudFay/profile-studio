@@ -33,6 +33,7 @@ test("marketing routes load directly with their local assets", () => {
   pages.forEach(([pagePath, route]) => {
     const html = readPage(pagePath);
     assert.match(html, new RegExp(`<body[^>]*data-page="${route}"`));
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml"/);
     assertLocalAssetsResolve(pagePath, html);
   });
 
