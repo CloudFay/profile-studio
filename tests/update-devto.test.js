@@ -171,3 +171,242 @@ test("rejects duplicate or reversed README markers", () => {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
 });
+
+test("retries transient 5xx responses without delaying the test", async () => {
+  let calls = 0;
+  const delays = [];
+  const restore = withMockedHttpsGet((url, options, callback) => {
+    calls += 1;
+    const status = calls < 3 ? 503 : 200;
+    const response = {
+      statusCode: status,
+      headers: {},
+      setEncoding() {},
+      on(event, handler) {
+        if (event === "end") handler();
+        if (event === "data" && status === 200) handler("[]");
+      },
+    };
+    callback(response);
+    return { setTimeout() {}, on() {} };
+  });
+
+  try {
+    assert.deepEqual(await updater.fetchArticles("CloudFay", 20, {
+      sleepFn: async (ms) => delays.push(ms),
+    }), []);
+    assert.equal(calls, 3);
+    assert.deepEqual(delays, [1000, 2000]);
+  } finally {
+    restore();
+  }
+});
+
+test("exhausts retries and returns the final transient error", async () => {
+  let calls = 0;
+  const restore = withMockedHttpsGet((url, options, callback) => {
+    calls += 1;
+    const response = {
+      statusCode: 500,
+      headers: {},
+      setEncoding() {},
+      on(event, handler) {
+        if (event === "end") handler();
+      },
+    };
+    callback(response);
+    return { setTimeout() {}, on() {} };
+  });
+
+  try {
+    await assert.rejects(
+      updater.fetchArticles("CloudFay", 20, { sleepFn: async () => {} }),
+      /HTTP 500/
+    );
+    assert.equal(calls, 3);
+  } finally {
+    restore();
+  }
+});
+
+test("ignores invalid Retry-After values and uses exponential backoff", async () => {
+  let calls = 0;
+  const delays = [];
+  const restore = withMockedHttpsGet((url, options, callback) => {
+    calls += 1;
+    const response = {
+      statusCode: 502,
+      headers: { "retry-after": "tomorrow" },
+      setEncoding() {},
+      on(event, handler) {
+        if (event === "end") handler();
+      },
+    };
+    callback(response);
+    return { setTimeout() {}, on() {} };
+  });
+
+  try {
+    await assert.rejects(
+      updater.fetchArticles("CloudFay", 20, {
+        sleepFn: async (ms) => delays.push(ms),
+      }),
+      /HTTP 502/
+    );
+    assert.equal(calls, 3);
+    assert.deepEqual(delays, [1000, 2000]);
+  } finally {
+    restore();
+  }
+});
+
+test("retries request errors without delaying the test", async () => {
+  let calls = 0;
+  const restore = withMockedHttpsGet((url, options, callback) => {
+    calls += 1;
+    if (calls < 3) {
+      const request = {
+        setTimeout() {},
+        on(event, handler) {
+          if (event === "error") {
+            queueMicrotask(() => handler(new Error("socket failure")));
+          }
+        },
+      };
+      return request;
+    }
+
+    const response = {
+      statusCode: 200,
+      headers: {},
+      setEncoding() {},
+      on(event, handler) {
+        if (event === "data") handler("[]");
+        if (event === "end") handler();
+      },
+    };
+    callback(response);
+    return { setTimeout() {}, on() {} };
+  });
+
+  try {
+    assert.deepEqual(await updater.fetchArticles("CloudFay", 20, {
+      sleepFn: async () => {},
+    }), []);
+    assert.equal(calls, 3);
+  } finally {
+    restore();
+  }
+});
+
+test("rejects README updates when README is missing", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    assert.throws(
+      () => updater.updateReadme("<!-- DEVTO:START -->x<!-- DEVTO:END -->"),
+      /README.md not found/
+    );
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("rejects generated DEV.to content without both markers", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    fs.writeFileSync("README.md", "<!-- DEVTO:START -->\nold\n<!-- DEVTO:END -->\n", "utf8");
+    assert.throws(
+      () => updater.updateReadme("generated content"),
+      /Generated DEV.to content is missing required markers/
+    );
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("rejects README with only one DEV.to marker", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    fs.writeFileSync("README.md", "<!-- DEVTO:START -->\nold\n", "utf8");
+    assert.throws(
+      () => updater.updateReadme("<!-- DEVTO:START -->x<!-- DEVTO:END -->"),
+      /exactly one DEV.to marker pair/
+    );
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("returns false when the README content is already current", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    const content = "<!-- DEVTO:START -->\nx\n<!-- DEVTO:END -->";
+    fs.writeFileSync("README.md", content, "utf8");
+    assert.equal(updater.updateReadme(content), false);
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("normalizes DEV.to post_count configuration", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    fs.mkdirSync(".github");
+    fs.writeFileSync(".github/profile-studio.json", JSON.stringify({
+      devto: { username: " CloudFay ", post_count: 99, enabled: true, automation: true },
+    }), "utf8");
+    assert.deepEqual(updater.readConfig(), {
+      username: "CloudFay", postCount: 20, enabled: true, automation: true,
+    });
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("defaults invalid post_count and disabled DEV.to flags safely", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    fs.mkdirSync(".github");
+    fs.writeFileSync(".github/profile-studio.json", JSON.stringify({
+      devto: { post_count: "not-a-number", enabled: false, automation: false },
+    }), "utf8");
+    assert.deepEqual(updater.readConfig(), {
+      username: "", postCount: 5, enabled: false, automation: false,
+    });
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
+
+test("fails clearly when DEV.to configuration is missing or invalid", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "profile-studio-devto-"));
+  const previous = process.cwd();
+  process.chdir(tempDir);
+  try {
+    assert.throws(() => updater.readConfig(), /profile-studio\.json not found/);
+    fs.mkdirSync(".github");
+    fs.writeFileSync(".github/profile-studio.json", "{", "utf8");
+    assert.throws(() => updater.readConfig(), /Failed to parse/);
+  } finally {
+    process.chdir(previous);
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+});
