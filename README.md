@@ -2,6 +2,8 @@
   <img src="./assets/profile-studio-logo.svg" alt="Profile Studio" width="360" />
 </p>
 
+[![Coverage](https://codecov.io/gh/CloudFay/profile-studio/graph/badge.svg)](https://codecov.io/gh/CloudFay/profile-studio)
+
 ### Build a polished GitHub Profile README without writing it from scratch.
 
 [![Live App](https://img.shields.io/badge/Live%20App-Create%20your%20profile-c900a8?style=for-the-badge)](https://cloudfay.github.io/profile-studio/create-yours/)
