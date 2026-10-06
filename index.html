@@ -1,296 +1,204 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Profile Studio — GitHub README Builder</title>
-<meta name="description" content="Build a polished GitHub profile README with a live preview — tech badges, stats cards, social links and more." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/styles.css" />
-<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" defer></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Design a GitHub profile README that feels like you. Build it visually with Profile Studio's guided editor and live preview." />
+  <meta name="theme-color" content="#090812" />
+  <title>Profile Studio — Your GitHub profile, designed.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <script src="js/site.js" defer></script>
 </head>
-<body>
-
-<header class="topbar">
-  <div class="brand">
-    <div class="brand-mark">
-      <svg class="ic" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-    </div>
-    <div>
-      <div class="brand-name">Profile <b>Studio</b></div>
-      <div class="brand-sub">README.md builder</div>
-    </div>
-  </div>
-  <div class="topbar-actions">
-    <button class="btn btn-ghost mobile-preview-btn" id="mobilePreviewBtn" type="button">
-      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-      Preview
+<body class="site-page" data-page="home">
+  <a class="skip-link" href="#site-main">Skip to content</a>
+  <header class="site-header">
+    <a class="site-brand" href="./" aria-label="Profile Studio home" data-site-link data-route="home">
+      <span class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span>profile<span class="brand-accent">studio</span></span>
+    </a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+      <span class="sr-only">Toggle navigation</span><span class="menu-lines" aria-hidden="true"></span>
     </button>
-    <div class="palette-wrap">
-      <button class="theme-pill" id="paletteBtn" type="button" title="Change theme color" aria-label="Change theme color">
-        <span class="palette-swatch"></span>
-        <span class="theme-pill-label">Theme</span>
-        <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="palette-pop" id="palettePop">
-        <div class="pop-title">Accent color</div>
-        <div class="swatches" id="swatches"></div>
-        <label class="custom-color" title="Click, then drag in the picker to fine-tune">
-          <span class="cc-label">Custom</span>
-          <span class="cc-hint">drag to edit</span>
-          <input type="color" id="customColor" />
-        </label>
-      </div>
-    </div>
-    <button class="icon-btn" id="themeBtn" type="button" title="Toggle theme" aria-label="Toggle theme"></button>
-    <button class="icon-btn" id="resetBtn" type="button" title="Start over" aria-label="Start over">
-      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    <nav class="site-nav" id="primary-navigation" aria-label="Primary navigation">
+      <a class="nav-link" href="./" data-site-link data-route="home">Home</a>
+      <a class="nav-link" href="use-cases/" data-site-link data-route="use-cases">Use cases</a>
+      <a class="nav-link" href="https://github.com/CloudFay/profile-studio#readme">Docs</a>
+      <a class="nav-link nav-github" href="https://github.com/CloudFay/profile-studio" aria-label="Profile Studio on GitHub">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.73 1.16 1.73 1.16 1 .1.26 2.04 2.72 1.47.1-.73.39-1.22.7-1.5-2.5-.29-5.13-1.25-5.13-5.56 0-1.23.44-2.23 1.16-3.02-.12-.29-.5-1.43.11-2.98 0 0 .94-.3 3.08 1.15a10.7 10.7 0 0 1 5.61 0c2.14-1.45 3.08-1.15 3.08-1.15.61 1.55.23 2.69.12 2.98.72.79 1.15 1.79 1.15 3.02 0 4.32-2.63 5.27-5.14 5.55.4.35.75 1.03.75 2.08v3.08c0 .3.2.65.78.54A11.2 11.2 0 0 0 12 .8Z"/></svg>
+      </a>
+      <a class="button button-small button-primary nav-cta" href="create-yours/">Create yours <span aria-hidden="true">↗</span></a>
+    </nav>
+    <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch color theme">
+      <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.8"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
     </button>
-  </div>
-</header>
+  </header>
 
-<div class="layout">
-  <!-- FORM PANE -->
-  <section class="pane pane-form">
-    <div class="pane-form-inner" id="wizardView">
-      <div class="stepper" id="stepper"></div>
-
-      <!-- STEP 1: Identity -->
-      <div class="step active" id="step0">
-        <h2 class="step-title">Let's start with the basics</h2>
-        <p class="step-desc">Your username powers the live widgets. The header is the big line at the top; the headlines are the small lines beneath it.</p>
-        <div class="field">
-          <label class="field-label" for="f_username">GitHub username</label>
-          <div class="input-prefixed">
-            <span class="input-prefix">github.com/</span>
-            <input class="input" id="f_username" data-key="username" placeholder="yourusername" autocomplete="off" />
+  <main id="site-main" data-page="home">
+    <section class="hero-wrap section-shell">
+      <div class="hero">
+        <div class="hero-light" aria-hidden="true"></div>
+        <div class="hero-dots" aria-hidden="true"></div>
+        <div class="hero-copy">
+          <p class="eyebrow hero-eyebrow" data-reveal><span class="eyebrow-spark"></span>A more considered GitHub profile</p>
+          <h1 class="hero-title" data-reveal>Your GitHub<br />profile, <span>designed.</span></h1>
+          <p class="hero-description" data-reveal>Turn the README that introduces you into something worth remembering. Build it visually, see every change live, and leave the Markdown to us.</p>
+          <div class="hero-actions" data-reveal>
+            <a class="button button-primary" href="create-yours/">Create yours <span aria-hidden="true">↗</span></a>
+            <a class="button button-quiet" href="#how-it-works">See how it works <span aria-hidden="true">↓</span></a>
           </div>
-          <div class="field-hint">Powers your stats cards and dynamic widgets.</div>
+          <p class="hero-note" data-reveal>No account. No setup. Just your profile, your way.</p>
         </div>
-        <div class="field">
-          <label class="field-label" for="f_greeting">Header <span class="opt">— the big line at the top</span></label>
-          <input class="input" id="f_greeting" placeholder="Hello! I'm" autocomplete="off" />
-          <div class="field-hint">Type your name after it (“Hello! I’m Anurag”), replace it entirely, or clear it to hide the header.</div>
-        </div>
-        <div class="field">
-          <label class="field-label">Profile portrait <span class="opt">— optional Hero visual</span></label>
-          <input class="input" type="file" id="f_portrait" accept="image/jpeg,image/png,image/webp" />
-          <div class="field-hint">Upload a photo. Profile Studio converts it locally into a dot-matrix SVG; your original photo is not packaged.</div>
-          <div class="portrait-controls" id="portraitControls">
-            <label class="checkbox-row"><input type="checkbox" id="f_portraitColor" checked /><span><strong>Use photo colors</strong><small>Keep the portrait in color.</small></span></label>
-            <label class="checkbox-row"><input type="checkbox" id="f_portraitReveal" checked /><span><strong>Reveal animation</strong><small>Build the portrait from top to bottom.</small></span></label>
-            <label class="checkbox-row"><input type="checkbox" id="f_profileViews" /><span><strong>Profile views</strong><small>Show a public profile-view counter beneath your social badges.</small></span></label>
-          </div>
-          <div id="portraitStatus" class="field-hint"></div>
-        </div>
-        <div class="field">
-          <label class="field-label" for="f_tagline">Headline 1 <span class="opt">— small line under your name</span></label>
-          <input class="input" id="f_tagline" data-key="tagline" placeholder="I do open source :)" />
-        </div>
-        <div class="field">
-          <label class="field-label" for="f_tagline2">Headline 2 <span class="opt">— optional, adds a second animated line</span></label>
-          <input class="input" id="f_tagline2" data-key="tagline2" placeholder="Turning coffee into clean, tested code" />
-        </div>
-        <div class="field">
-          <label class="field-label">Headline color <span class="opt">— for the moving lines (different from the header)</span></label>
-          <div class="hl-swatches" id="hlSwatches"></div>
-        </div>
-      </div>
-
-      <!-- STEP 2: About -->
-      <div class="step" id="step1">
-        <h2 class="step-title">About you</h2>
-        <p class="step-desc">A short intro, plus optional lines. Drag the ⋮⋮ handle to reorder how they appear.</p>
-        <div class="field">
-          <label class="field-label" for="f_bio">Bio</label>
-          <textarea class="textarea" id="f_bio" data-key="bio" placeholder="Software engineer who loves clean APIs, fast feedback loops, and good coffee. I build things for the web and write about what I learn."></textarea>
-        </div>
-        <div class="sortable" id="aboutFields"></div>
-      </div>
-
-      <!-- STEP 3: Tech stack -->
-      <div class="step" id="step2">
-        <h2 class="step-title">Tech stack</h2>
-        <p class="step-desc">Pick what you work with. Each selection becomes a colored badge in your README.</p>
-        <div id="catalog"></div>
-      </div>
-
-      <!-- STEP 4: Socials -->
-      <div class="step" id="step3">
-        <h2 class="step-title">Connect</h2>
-        <p class="step-desc">Add the links you want people to find. Enter just a handle — we'll build the full URL. Drag ⋮⋮ to reorder.</p>
-        <div id="socials"></div>
-      </div>
-
-      <!-- STEP 5: Add-ons -->
-      <div class="step" id="step4">
-        <h2 class="step-title">Dynamic add-ons</h2>
-        <p class="step-desc">Live widgets that auto-update on your real profile. They render from your GitHub username.</p>
-        <div id="addons"></div>
-      </div>
-
-      <!-- NAV -->
-      <div class="btnRow">
-        <button class="btn btn-back" id="backBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-          Back
-        </button>
-        <button class="btn btn-primary btn-grow" id="nextBtn" type="button">
-          <span id="nextLabel">Continue</span>
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- FINISH (replaces the wizard in this pane) -->
-    <div class="finish-view" id="finishView">
-      <div class="finish-burst">
-        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5"/></svg>
-      </div>
-      <h2 class="finish-title">Your README is ready</h2>
-      <p class="finish-sub">Grab the markdown, or start a fresh profile. Publishing it takes about 30 seconds.</p>
-
-      <div class="finish-actions">
-        <button class="btn btn-primary" id="finishDownloadBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
-          Download README.md
-        </button>
-        <button class="btn" id="finishPackageBtn" type="button" hidden>
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 7h16"/>
-            <path d="M7 3h10l1 4H6l1-4Z"/>
-            <path d="M6 7v14h12V7"/>
-          </svg>
-          Download Profile Studio package
-        </button>
-        <button class="btn" id="finishCopyBtn" type="button" hidden>
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy markdown
-        </button>
-        <button class="btn" id="finishShareBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5 8.6 10.5"/></svg>
-          Share
-        </button>
-      </div>
-
-      <div class="publish">
-        <div class="publish-title">Publish it to your profile</div>
-
-        <ol class="publish-steps">
-          <li>
-            Create a new <strong>public repository</strong> named exactly the same as
-            your GitHub username: <code id="finishRepo">your-github-username</code>.
-          </li>
-
-          <li>
-            Add the <code>README.md</code> file you just downloaded
-            to the root of the repository.
-          </li>
-
-          <li>
-            Commit the changes, then visit
-            <code>github.com/<span id="finishUser">your-github-username</span></code>.
-            Your README will appear on your GitHub profile.
-          </li>
-        </ol>
-
-        <p>
-          <strong>Example:</strong>
-          If your GitHub username is <code>your-github-username</code>, your special
-          repository must also be named <code>your-github-username</code>.
-        </p>
-
-        <div class="publish-automation" id="finishAutomationGuide" hidden>
-          <div class="publish-title">Set up Profile Studio automation</div>
-
-          <p>
-            Your package contains the files required for the dynamic features you enabled.
-            Copy the package contents into the root of your GitHub profile repository.
-          </p>
-
-          <ol class="publish-steps">
-            <li>
-              Create or open your public profile repository named exactly the same as your GitHub username.
-            </li>
-            <li>
-              Copy the downloaded package contents into the repository. Merge the
-              <code>.github</code> folder if you already have workflows.
-            </li>
-            <li>
-              If you enabled the dot-matrix portrait, keep
-              <code>assets/profile-studio/portrait.svg</code> in place.
-            </li>
-            <li>
-              If you enabled Contribution Activity or Contribution Snake, allow GitHub Actions to write to the
-              repository and run <strong>Update Profile Studio Contribution Activity</strong> once.
-              The generated activity graph and snake assets are published to the <code>output</code> branch.
-            </li>
-            <li>
-              If you enabled DEV.to automation, keep its generated workflow and configuration
-              alongside the other Profile Studio files.
-            </li>
-          </ol>
-
-          <p>
-            Profile Studio only updates the dynamic assets/features you enabled.
-            Your main README content remains yours.
-          </p>
+        <div class="hero-product" data-reveal aria-label="Profile Studio live README preview">
+          <div class="orbit orbit-one" aria-hidden="true"></div>
+          <div class="orbit orbit-two" aria-hidden="true"></div>
+          <div class="product-window">
+            <div class="window-top">
+              <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+              <span class="window-label">PROFILE STUDIO <span>/</span> LIVE PREVIEW</span>
+              <span class="window-live"><i></i> LIVE</span>
+            </div>
+            <div class="profile-preview">
+              <div class="profile-ident">
+                <div class="profile-avatar" aria-hidden="true">
+                  <span class="avatar-field"></span><span class="avatar-glint"></span>
                 </div>
+                <div><span class="profile-kicker">GITHUB PROFILE</span><strong>Your name here</strong><span class="profile-handle">@your-handle</span></div>
+              </div>
+              <div class="typing-line">I build useful things<span class="typing-cursor" aria-hidden="true"></span></div>
+              <p class="profile-bio">A little about you, a lot about what you love to build.</p>
+              <div class="preview-badges"><span>JavaScript</span><span>React</span><span>Open source</span></div>
+              <div class="preview-rule"></div>
+              <div class="preview-section-head"><span>CONTRIBUTION ACTIVITY</span><span>PREVIEW</span></div>
+              <div class="contribution-dots" aria-hidden="true">
+                <i></i><i class="dot-on"></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i></i><i></i><i></i><i class="dot-on"></i><i></i><i></i><i></i><i></i><i class="dot-mid"></i><i></i><i></i><i></i><i class="dot-on"></i>
+              </div>
+              <div class="profile-foot"><span><i class="status-dot"></i> Built with Profile Studio</span><span class="profile-foot-mark">✳</span></div>
+            </div>
+          </div>
+          <div class="product-float float-markdown"><span class="float-markdown-icon">⌘</span><span><b>README.md</b><small>ready to share</small></span><i>↗</i></div>
+          <div class="product-float float-portrait"><span class="float-mini-portrait" aria-hidden="true"></span><span><b>Dot portrait</b><small>made from your photo</small></span></div>
+        </div>
+        <div class="hero-bottomline"><span>MAKE YOUR FIRST IMPRESSION COUNT</span><span>SCROLL TO EXPLORE <span aria-hidden="true">↓</span></span></div>
+      </div>
+    </section>
+
+    <section class="tech-strip section-shell" aria-label="Works with">
+      <p>Built around the tools<br />you already use</p>
+      <div class="tech-list"><span>GitHub</span><span>Markdown</span><span>GitHub Actions</span><span>DEV.to</span><span>SVG</span></div>
+    </section>
+
+    <section class="intro-section section-shell" id="how-it-works">
+      <div class="section-kicker" data-reveal><span>01</span> A better way to introduce yourself</div>
+      <div class="intro-grid">
+        <h2 data-reveal>Less formatting.<br /><span>More you.</span></h2>
+        <div data-reveal><p>A profile README can say a lot about you. Creating one shouldn't mean fighting markup, stitching together badges, or guessing what the final page will look like.</p><a class="text-link" href="create-yours/">Make yours, visually <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+
+    <section class="story-section section-shell" id="create">
+      <div class="story-panel story-create">
+        <div class="story-copy" data-reveal>
+          <p class="eyebrow"><span>01 / CREATE</span></p>
+          <h2>Start with<br />what makes<br /><span>you, you.</span></h2>
+          <p>Your username, your words, your stack. A guided flow helps you shape the details without making you start from a blank file.</p>
+          <a class="text-link" href="create-yours/">Build your profile <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="story-visual create-visual" data-reveal aria-label="Profile identity builder preview">
+          <div class="editor-card">
+            <div class="editor-top"><span class="editor-step"><i>01</i> IDENTITY</span><span class="editor-progress">01 <i>/</i> 05</span></div>
+            <h3>Let's start with the basics</h3>
+            <label>GitHub username</label><div class="fake-input"><span>github.com/</span><b>yourusername</b><i>⌁</i></div>
+            <label>Your headline</label><div class="fake-input headline-input">I build things for the web<span class="fake-caret"></span></div>
+            <div class="editor-hint"><span class="hint-check">✓</span> Your profile preview updates as you go.</div>
+            <div class="editor-next">Continue <span>→</span></div>
+          </div>
+          <div class="create-stamp">YOUR STORY<br />STARTS HERE <span>✳</span></div>
+        </div>
       </div>
 
-      <div class="finish-foot">
-        <button class="btn btn-ghost" id="finishBackBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
-          Keep editing
-        </button>
-        <button class="btn btn-grow" id="finishAnotherBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          Create another profile
-        </button>
+      <div class="story-panel story-preview" id="preview">
+        <div class="story-visual preview-visual" data-reveal aria-label="Rendered profile README and Markdown view">
+          <div class="preview-tabs"><span class="selected">Preview</span><span>Markdown</span><span class="tab-live"><i></i> LIVE</span></div>
+          <div class="readme-card">
+            <div class="readme-heading"><span class="readme-avatar">✳</span><div><b>Hello, I'm your name</b><span>developer · maker · curious human</span></div></div>
+            <div class="readme-typing">I turn ideas into useful things<span class="typing-cursor" aria-hidden="true"></span></div>
+            <div class="readme-text">Building for the web and learning a little more every day.</div>
+            <div class="readme-badges"><span>JavaScript</span><span>TypeScript</span><span>React</span></div>
+            <div class="readme-divider"></div>
+            <div class="readme-label">ABOUT ME</div>
+            <div class="readme-line"></div><div class="readme-line short"></div>
+            <div class="readme-activity-label">CONTRIBUTION ACTIVITY <span>↗</span></div>
+            <div class="mini-activity" aria-hidden="true"><i></i><i></i><i class="on"></i><i></i><i></i><i class="mid"></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="mid"></i><i></i><i class="on"></i><i></i><i></i><i class="mid"></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="mid"></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="mid"></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="mid"></i><i></i><i></i></div>
+          </div>
+          <div class="markdown-float"><span class="markdown-dots">● ● ●</span><code><span>#</span> Hello, I'm you<br /><span>##</span> About Me<br />- building for the web</code></div>
+        </div>
+        <div class="story-copy" data-reveal>
+          <p class="eyebrow"><span>02 / PREVIEW</span></p>
+          <h2>See it come<br />together <span>live.</span></h2>
+          <p>Your profile takes shape beside you. Switch between the rendered README and its Markdown whenever you want to see under the hood.</p>
+          <a class="text-link" href="create-yours/">See the builder <span aria-hidden="true">↗</span></a>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- PREVIEW PANE -->
-  <section class="pane pane-preview">
-    <div class="preview-head">
-      <div class="preview-tabs">
-        <button class="ptab on" id="tabPreview" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-          Preview
-        </button>
-        <button class="ptab" id="tabRaw" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>
-          Markdown
-        </button>
+      <div class="story-panel story-automate" id="automate">
+        <div class="story-copy" data-reveal>
+          <p class="eyebrow"><span>03 / AUTOMATE</span></p>
+          <h2>Your profile,<br /><span>still in motion.</span></h2>
+          <p>Add details that can stay fresh: GitHub stats, contribution activity, profile views, your DEV.to writing, or a dot-matrix portrait made from your own photo.</p>
+          <a class="text-link" href="use-cases/">Explore what you can add <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="story-visual automate-visual" data-reveal aria-label="Profile Studio dynamic features">
+          <div class="automation-heading"><span>PROFILE MODULES</span><span>ADD WHAT FITS</span></div>
+          <div class="automation-grid">
+            <div class="automation-module module-portrait"><span class="module-symbol dot-symbol">⠿</span><b>Dot portrait</b><small>Your photo, translated into SVG</small><span class="module-state">LOCAL · PRIVATE</span></div>
+            <div class="automation-module module-activity"><span class="module-symbol activity-symbol">▦</span><b>Contribution activity</b><small>Activity graph & contribution snake</small><span class="module-state">GITHUB ACTIONS</span></div>
+            <div class="automation-module module-stats"><span class="module-symbol stats-symbol">⌁</span><b>GitHub stats</b><small>Profile stats & top languages</small><span class="module-state">LIVE WIDGETS</span></div>
+            <div class="automation-module module-writing"><span class="module-symbol writing-symbol">↗</span><b>DEV.to writing</b><small>Recent posts in your README</small><span class="module-state">OPTIONAL</span></div>
+          </div>
+          <div class="automation-note"><span class="automation-pulse"></span>Generated workflows, ready for your profile repo<span>↗</span></div>
+        </div>
       </div>
-      <div class="preview-actions">
-        <button class="btn" id="copyBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy
-        </button>
-        <button class="btn btn-primary" id="downloadBtn" type="button">
-          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/></svg>
-          Download
-        </button>
-      </div>
-    </div>
-    <div class="preview-body">
-      <div class="md" id="previewRendered"></div>
-      <div class="md-raw" id="previewRaw" hidden></div>
-    </div>
-  </section>
-</div>
 
-<script src="js/catalog.js" defer></script>
-<script src="js/security.js" defer></script>
-<script src="js/portrait.js" defer></script>
-<script src="js/state.js" defer></script>
-<script src="js/devto.js" defer></script>
-<script src="js/generator.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
-<script src="js/app.js?v=0.4.1" defer></script>
+      <div class="story-panel story-share" id="share">
+        <div class="story-visual share-visual" data-reveal aria-label="README export options">
+          <div class="share-window">
+            <div class="share-window-top"><span>YOUR PROFILE / READY</span><span class="ready-pill"><i></i> READY</span></div>
+            <div class="share-document"><span class="doc-glyph">M↓</span><div><strong>README.md</strong><small>Your profile. One file.</small></div><span class="doc-check">✓</span></div>
+            <div class="share-actions"><span><i>↓</i> Download</span><span><i>⌘</i> Copy markdown</span><span><i>▣</i> Full package</span></div>
+            <div class="share-divider"></div>
+            <div class="share-publish"><span class="publish-step">NEXT UP</span><div><b>Your GitHub profile repo</b><small>Download. Add README.md. Publish.</small></div><span class="publish-arrow">↗</span></div>
+          </div>
+          <div class="share-glow-ring" aria-hidden="true"></div>
+        </div>
+        <div class="story-copy" data-reveal>
+          <p class="eyebrow"><span>04 / SHARE</span></p>
+          <h2>Make it yours.<br /><span>Put it out there.</span></h2>
+          <p>Copy the Markdown, download your README, or get a package with the assets and workflows for the features you chose. Then publish it to your profile repo.</p>
+          <a class="text-link" href="create-yours/">Create your README <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing section-shell" data-reveal>
+      <div class="closing-grid" aria-hidden="true"></div>
+      <span class="closing-kicker">YOUR PROFILE IS YOURS TO SHAPE</span>
+      <h2>Give your GitHub<br />profile <span>a point of view.</span></h2>
+      <p>A more thoughtful introduction starts with a few good choices.</p>
+      <a class="button button-primary" href="create-yours/">Create yours <span aria-hidden="true">↗</span></a>
+      <div class="closing-mark" aria-hidden="true">✳</div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-main">
+      <a class="site-brand footer-brand" href="./" aria-label="Profile Studio home" data-site-link data-route="home"><span class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></span><span>profile<span class="brand-accent">studio</span></span></a>
+      <p>A little more you in every line.</p>
+      <div class="footer-links"><a href="use-cases/" data-site-link data-route="use-cases">Use cases</a><a href="create-yours/">Create yours</a><a href="https://github.com/CloudFay/profile-studio">GitHub</a><a href="https://github.com/CloudFay/profile-studio#readme">Documentation</a></div>
+    </div>
+    <div class="footer-bottom"><span>Profile Studio — an open source README builder</span><a href="https://github.com/CloudFay/profile-studio">Made for the GitHub community <span aria-hidden="true">↗</span></a></div>
+  </footer>
 </body>
 </html>

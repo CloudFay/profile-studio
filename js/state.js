@@ -80,7 +80,7 @@
 
       statsHost: "",
       badgeStyle: "for-the-badge",
-      accent: "#2ea043",
+      accent: "#9472ff",
     });
 
     function mergeOrder(saved, defaults) {
@@ -105,6 +105,7 @@
           const defaults = defaultState();
 
           const state = Object.assign(defaults, raw);
+          if (raw.accent === "#2ea043") state.accent = defaults.accent;
 
           state.addons = Object.assign(
             defaultState().addons,

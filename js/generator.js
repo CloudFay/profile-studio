@@ -34,7 +34,7 @@
       const s = state;
       const user = (s.username || "").trim();
       const uEnc = encodeURIComponent(user);
-      const ac = (s.accent || "#2ea043").replace("#", "");
+      const ac = (s.accent || "#9472ff").replace("#", "");
       const a = s.addons;
       const hero = s.hero || {};
       const th = statTheme(documentRef);

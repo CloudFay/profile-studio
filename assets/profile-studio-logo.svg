@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="72" viewBox="0 0 360 72" role="img" aria-labelledby="title">
+  <title id="title">Profile Studio</title>
+  <g fill="none" stroke="#7148d5" stroke-width="2.2" transform="rotate(-28 34 36)">
+    <ellipse cx="34" cy="25" rx="8" ry="3.1"/>
+    <ellipse cx="34" cy="36" rx="10.5" ry="3.1"/>
+    <ellipse cx="34" cy="47" rx="8" ry="3.1"/>
+  </g>
+  <text x="62" y="47" fill="#15121e" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="34" font-weight="700" letter-spacing="-1.9">profile<tspan fill="#ce0ba7">studio</tspan></text>
+</svg>

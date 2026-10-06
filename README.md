@@ -1,8 +1,10 @@
-# 🎨 Profile Studio
+<p align="center">
+  <img src="./assets/profile-studio-logo.svg" alt="Profile Studio" width="360" />
+</p>
 
 ### Build a polished GitHub Profile README without writing it from scratch.
 
-[![Live App](https://img.shields.io/badge/Live%20App-Open%20Profile%20Studio-c900a8?style=for-the-badge)](https://cloudfay.github.io/profile-studio/)
+[![Live App](https://img.shields.io/badge/Live%20App-Create%20your%20profile-c900a8?style=for-the-badge)](https://cloudfay.github.io/profile-studio/create-yours/)
 [![GitHub](https://img.shields.io/badge/GitHub-CloudFay-181717?style=for-the-badge&logo=github)](https://github.com/CloudFay/profile-studio)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
 
@@ -21,7 +23,7 @@ Just open Profile Studio and build your profile.
 
 ## 🚀 Open Profile Studio
 
-**[→ Launch the live app](https://cloudfay.github.io/profile-studio/)**
+**[→ Visit Profile Studio](https://cloudfay.github.io/profile-studio/)** · [Create your profile](https://cloudfay.github.io/profile-studio/create-yours/) · [Use cases](https://cloudfay.github.io/profile-studio/use-cases/)
 
 ---
 
@@ -436,7 +438,14 @@ At a high level:
                     ┌──────────────────────────┐
                     │       Profile Studio     │
                     │          UI              │
-                    │      index.html          │
+                    │    Static site shell     │
+                    │    / · /use-cases/       │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │      /create-yours/      │
+                    │   Existing builder UI    │
                     └────────────┬─────────────┘
                                  │
                                  ▼
@@ -479,6 +488,7 @@ profile-studio/
 │   └── profile-studio.json
 │
 ├── css/
+│   ├── site.css
 │   └── styles.css
 │
 ├── js/
@@ -486,7 +496,13 @@ profile-studio/
 │   ├── catalog.js
 │   ├── devto.js
 │   ├── generator.js
-│   └── security.js
+│   ├── security.js
+│   └── site.js
+│
+├── create-yours/
+│   └── index.html
+├── use-cases/
+│   └── index.html
 │
 ├── tests/
 │   └── devto.test.js
@@ -503,8 +519,12 @@ profile-studio/
 
 | File / Directory | Purpose |
 |---|---|
-| `index.html` | Application interface and wizard markup |
-| `css/styles.css` | Application styling and responsive layout |
+| `index.html` | Marketing homepage |
+| `use-cases/index.html` | Audience and use-case page |
+| `create-yours/index.html` | Existing Profile Studio builder interface |
+| `css/site.css` | Marketing site design system and responsive layout |
+| `css/styles.css` | Builder styling and responsive layout |
+| `js/site.js` | Marketing navigation, theme, and scroll reveals |
 | `js/app.js` | Application state, wizard behavior, and UI interactions |
 | `js/catalog.js` | Technology, social platform, and badge catalog |
 | `js/devto.js` | DEV.to username handling, article fetching, and Markdown generation |
@@ -555,13 +575,13 @@ git clone https://github.com/CloudFay/profile-studio.git
 cd profile-studio
 ```
 
-Then open:
+Start a local HTTP server from the repository root so direct routes and client-side page navigation work:
 
-```text
-index.html
+```bash
+python -m http.server 8000
 ```
 
-in your browser.
+Open `http://localhost:8000/` for the website or `http://localhost:8000/create-yours/` to go straight to the builder.
 
 ---
 
@@ -629,7 +649,7 @@ To use it:
 
 ### 1. Open Profile Studio
 
-[**Launch the app**](https://cloudfay.github.io/profile-studio/)
+[**Visit Profile Studio**](https://cloudfay.github.io/profile-studio/) · [**Create your profile**](https://cloudfay.github.io/profile-studio/create-yours/)
 
 ### 2. Enter your GitHub username
 
