@@ -7,6 +7,9 @@ const README_PATH =
 
 const START_MARKER = "<!-- DEVTO:START -->";
 const END_MARKER = "<!-- DEVTO:END -->";
+const MAX_ARTICLES = 20;
+const API_ATTEMPTS = 3;
+const API_TIMEOUT_MS = 15000;
 
 function readConfig() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -26,27 +29,24 @@ function readConfig() {
   }
 
   const devto = config.devto || {};
+  const postCount = Number(devto.post_count);
 
   return {
-    username: String(
-      devto.username || ""
-    ).trim(),
-
+    username: String(devto.username || "").trim(),
     postCount: Math.min(
-      Math.max(
-        Number(devto.post_count) || 5,
-        1
-      ),
-      20
+      Math.max(Number.isFinite(postCount) ? postCount : 5, 1),
+      MAX_ARTICLES
     ),
-
     enabled: devto.enabled === true,
-
     automation: devto.automation === true,
   };
 }
 
-function fetchArticles(username, fetchCount) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function fetchArticlesOnce(username, fetchCount) {
   const url =
     `https://dev.to/api/articles?username=${encodeURIComponent(
       username
@@ -64,22 +64,46 @@ function fetchArticles(username, fetchCount) {
       (response) => {
         let body = "";
 
+        response.setEncoding("utf8");
+
         response.on("data", (chunk) => {
           body += chunk;
         });
 
         response.on("end", () => {
-          if (response.statusCode !== 200) {
+          const status = response.statusCode || 0;
+
+          if (status !== 200) {
+            const retryable = status === 429 || status >= 500;
+            const retryAfter = response.headers["retry-after"];
+
             reject(
-              new Error(
-                `DEV.to API returned HTTP ${response.statusCode}`
+              Object.assign(
+                new Error(
+                  `DEV.to API returned HTTP ${status}`
+                ),
+                {
+                  retryable,
+                  retryAfter:
+                    retryAfter && /^\\d+$/.test(String(retryAfter))
+                      ? Number(retryAfter)
+                      : null,
+                }
               )
             );
             return;
           }
 
           try {
-            resolve(JSON.parse(body));
+            const articles = JSON.parse(body);
+
+            if (!Array.isArray(articles)) {
+              throw new Error(
+                "DEV.to API returned an unexpected response shape"
+              );
+            }
+
+            resolve(articles);
           } catch (error) {
             reject(
               new Error(
@@ -91,8 +115,54 @@ function fetchArticles(username, fetchCount) {
       }
     );
 
-    request.on("error", reject);
+    request.setTimeout(API_TIMEOUT_MS, () => {
+      request.destroy(
+        new Error(
+          `DEV.to API request timed out after ${API_TIMEOUT_MS}ms`
+        )
+      );
+    });
+
+    request.on("error", (error) => {
+      reject(
+        Object.assign(error, {
+          retryable: true,
+          retryAfter: null,
+        })
+      );
+    });
   });
+}
+
+async function fetchArticles(username, fetchCount) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= API_ATTEMPTS; attempt += 1) {
+    try {
+      return await fetchArticlesOnce(
+        username,
+        fetchCount
+      );
+    } catch (error) {
+      lastError = error;
+
+      if (!error.retryable || attempt === API_ATTEMPTS) {
+        throw error;
+      }
+
+      const retryAfterMs = error.retryAfter
+        ? error.retryAfter * 1000
+        : 1000 * 2 ** (attempt - 1);
+
+      console.warn(
+        `DEV.to request failed (attempt ${attempt}/${API_ATTEMPTS}). Retrying in ${retryAfterMs}ms...`
+      );
+
+      await sleep(retryAfterMs);
+    }
+  }
+
+  throw lastError;
 }
 
 function escapeHtml(value) {
@@ -143,8 +213,8 @@ function generateMarkdown(articles, username) {
 
     const coverImage = safeUrl(
       article.cover_image ||
-      article.social_image ||
-      ""
+        article.social_image ||
+        ""
     );
 
     const description = String(
@@ -291,10 +361,30 @@ function updateReadme(content) {
     throw new Error("README.md not found");
   }
 
+  if (
+    !content.includes(START_MARKER) ||
+    !content.includes(END_MARKER)
+  ) {
+    throw new Error(
+      "Generated DEV.to content is missing required markers"
+    );
+  }
+
   const readme = fs.readFileSync(
     README_PATH,
     "utf8"
   );
+
+  const startMatches =
+    readme.split(START_MARKER).length - 1;
+  const endMatches =
+    readme.split(END_MARKER).length - 1;
+
+  if (startMatches !== 1 || endMatches !== 1) {
+    throw new Error(
+      `README.md must contain exactly one DEV.to marker pair (found ${startMatches} start marker(s) and ${endMatches} end marker(s))`
+    );
+  }
 
   const start = readme.indexOf(
     START_MARKER
@@ -306,7 +396,7 @@ function updateReadme(content) {
 
   if (start === -1 || end === -1) {
     throw new Error(
-      "DEV.to README markers were not found"
+      "DEV.to README markers were not found. Regenerate the README with Profile Studio to restore the managed DEV.to section."
     );
   }
 
@@ -328,18 +418,27 @@ function updateReadme(content) {
     console.log(
       "No README changes detected."
     );
-    return;
+    return false;
   }
 
+  const tempPath = `${README_PATH}.tmp`;
+
   fs.writeFileSync(
-    README_PATH,
+    tempPath,
     updated,
     "utf8"
+  );
+
+  fs.renameSync(
+    tempPath,
+    README_PATH
   );
 
   console.log(
     "README.md successfully updated."
   );
+
+  return true;
 }
 
 async function main() {
@@ -369,31 +468,17 @@ async function main() {
     `Fetching latest DEV.to articles for ${config.username}...`
   );
 
-  /*
-   * Always fetch the latest 20 articles.
-   *
-   * post_count controls display only.
-   * This means changing post_count from 3 to 5
-   * does not change which articles are considered
-   * latest.
-   */
+  // Always fetch the latest 20 articles.
+  // post_count controls display only.
   const articles = await fetchArticles(
     config.username,
-    20
+    MAX_ARTICLES
   );
 
   console.log(
     `Found ${articles.length} DEV.to articles.`
   );
 
-  /*
-   * Display only the number configured by the user.
-   *
-   * Example:
-   *   post_count = 3  -> newest 3 articles
-   *   post_count = 5  -> newest 5 articles
-   *   post_count = 10 -> newest 10 articles
-   */
   const visibleArticles = articles.slice(
     0,
     config.postCount
