@@ -134,8 +134,7 @@ function fetchArticlesOnce(username, fetchCount) {
   });
 }
 
-async function fetchArticles(username, fetchCount, options = {}) {
-  const sleepFn = options.sleepFn || sleep;
+async function fetchArticles(username, fetchCount) {
   let lastError;
 
   for (let attempt = 1; attempt <= API_ATTEMPTS; attempt += 1) {
@@ -151,16 +150,15 @@ async function fetchArticles(username, fetchCount, options = {}) {
         throw error;
       }
 
-      const retryAfterMs =
-        error.retryAfter !== null
-          ? error.retryAfter * 1000
-          : 1000 * 2 ** (attempt - 1);
+      const retryAfterMs = error.retryAfter
+        ? error.retryAfter * 1000
+        : 1000 * 2 ** (attempt - 1);
 
       console.warn(
         `DEV.to request failed (attempt ${attempt}/${API_ATTEMPTS}). Retrying in ${retryAfterMs}ms...`
       );
 
-      await sleepFn(retryAfterMs);
+      await sleep(retryAfterMs);
     }
   }
 
@@ -498,22 +496,10 @@ async function main() {
   updateReadme(markdown);
 }
 
-if (require.main === module) {
-  main().catch((error) => {
-    console.error(
-      `DEV.to update failed: ${error.message}`
-    );
+main().catch((error) => {
+  console.error(
+    `DEV.to update failed: ${error.message}`
+  );
 
-    process.exit(1);
-  });
-}
-
-module.exports = {
-  readConfig,
-  fetchArticlesOnce,
-  fetchArticles,
-  generateMarkdown,
-  updateReadme,
-  escapeHtml,
-  safeUrl,
-};
+  process.exit(1);
+});
