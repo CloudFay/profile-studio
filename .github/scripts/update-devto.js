@@ -497,10 +497,22 @@ async function main() {
   updateReadme(markdown);
 }
 
-main().catch((error) => {
-  console.error(
-    `DEV.to update failed: ${error.message}`
-  );
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(
+      `DEV.to update failed: ${error.message}`
+    );
 
-  process.exit(1);
-});
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  readConfig,
+  fetchArticlesOnce,
+  fetchArticles,
+  generateMarkdown,
+  updateReadme,
+  escapeHtml,
+  safeUrl,
+};
