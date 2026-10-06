@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "test": "node --test",
-    "test:coverage": "c8 --reporter=text --reporter=text-summary --reporter=html node --test",
+    "test:coverage": "c8 --reporter=text --reporter=text-summary --reporter=html --reporter=lcov node --test",
     "lint": "eslint ."
   },
   "devDependencies": {
