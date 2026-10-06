@@ -253,14 +253,18 @@ test("generates contribution snake", () => {
 
   state.addons.snake = true;
 
+  const options = createOptions();
+  options.readmeMode = true;
+
   const output = generate(
     state,
-    createOptions()
+    options
   );
 
   assert.match(output, /Contribution Activity/);
   assert.match(output, /snake\.svg/);
   assert.match(output, /snake-dark\.svg/);
+  assert.match(output, /raw\.githubusercontent\.com/);
 });
 
 test("generates developer quote", () => {
