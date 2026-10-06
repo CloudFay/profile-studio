@@ -134,7 +134,8 @@ function fetchArticlesOnce(username, fetchCount) {
   });
 }
 
-async function fetchArticles(username, fetchCount) {
+async function fetchArticles(username, fetchCount, options = {}) {
+  const sleepFn = options.sleepFn || sleep;
   let lastError;
 
   for (let attempt = 1; attempt <= API_ATTEMPTS; attempt += 1) {
@@ -158,7 +159,7 @@ async function fetchArticles(username, fetchCount) {
         `DEV.to request failed (attempt ${attempt}/${API_ATTEMPTS}). Retrying in ${retryAfterMs}ms...`
       );
 
-      await sleep(retryAfterMs);
+      await sleepFn(retryAfterMs);
     }
   }
 
