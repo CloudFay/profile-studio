@@ -6,6 +6,13 @@ on:
 
   workflow_dispatch:
 
+# Never allow two DEV.to syncs to modify README.md at the same time.
+# Keep queued runs instead of cancelling them so a scheduled/manual run
+# is not silently lost.
+concurrency:
+  group: profile-studio-devto-readme
+  cancel-in-progress: false
+
 jobs:
   update-devto:
     runs-on: ubuntu-latest
@@ -16,19 +23,30 @@ jobs:
     steps:
       - name: Checkout profile repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "20"
 
+      - name: Synchronize with main
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Update DEV.to articles
         env:
           DEVTO_README_PATH: README.md
         run: node .github/scripts/update-devto.js
 
-      - name: Commit changes
+      - name: Commit and push README changes
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
@@ -40,7 +58,18 @@ jobs:
           git add README.md
           git commit -m "chore: update DEV.to articles"
 
-          git fetch origin main
-          git rebase origin/main
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "README update pushed successfully"
+              exit 0
+            fi
 
-          git push origin HEAD:main
+            if [ "$attempt" -eq 3 ]; then
+              echo "Unable to push after $attempt attempts"
+              exit 1
+            fi
+
+            echo "Push rejected because main changed; rebasing onto the latest main..."
+            git fetch origin main
+            git rebase origin/main
+          done
