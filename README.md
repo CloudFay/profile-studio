@@ -296,7 +296,7 @@ Whilst you build, your GitHub profile tells us a lot about the kind of developer
 <br><br>
 <code>#devops</code> <code>#profilestudio</code> <code>#github</code> <code>+1</code>
 <br><br>
-<sub>Faith Omobude · 8/19/2026</sub>
+<sub>Faith Omobude · 19/08/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/building-a-developer-profile-that-keeps-working-introducing-profile-studio-ada"><strong>Read more ↗</strong></a>
 </td>
@@ -312,7 +312,7 @@ When I started building applications, I used to have a fairly simple definition 
 <br><br>
 <code>#softwareengineering</code> <code>#devex</code> <code>#javascript</code> <code>+1</code>
 <br><br>
-<sub>Faith Omobude · 8/14/2026</sub>
+<sub>Faith Omobude · 14/08/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/a-working-application-isnt-necessarily-a-well-engineered-application-391b"><strong>Read more ↗</strong></a>
 </td>
@@ -328,7 +328,7 @@ Just as we&#39;ve seen in the DevOps world, most organizations adopt AI tools, b
 <br><br>
 <code>#devops</code> <code>#ai</code> <code>#sre</code> <code>+1</code>
 <br><br>
-<sub>Faith Omobude · 3/10/2026</sub>
+<sub>Faith Omobude · 10/03/2026</sub>
 <br><br>
 <a href="https://dev.to/faithomobude/beyond-the-hype-the-realignment-of-ai-power-and-the-rise-of-model-agnostic-infrastructure-1h7n"><strong>Read more ↗</strong></a>
 </td>
@@ -706,13 +706,13 @@ The workflow uses markers so it can update only the DEV.to section of your READM
 Example:
 
 ```markdown
-<!-- DEVTO:START -->
+<!-- DEVTO:START (example only) -->
 
 ### 📝 Latest DEV.to Articles
 
 <!-- Automatically generated content -->
 
-<!-- DEVTO:END -->
+<!-- DEVTO:END (example only) -->
 ```
 
 You can manually trigger the workflow from:
